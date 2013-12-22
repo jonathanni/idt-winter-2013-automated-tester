@@ -34,7 +34,7 @@ interface Debugger
     public void expecting(char inputValue, char possibleValue, String expectedString);
     public void expecting(String inputValue, String possibleValue, String expectedString);
     public void expecting(int[] inputValue, int[] possibleValue, String expectedString);
-
+     
     /*
      * Logs :field:`expectedString`
      * Example usage:
@@ -44,4 +44,16 @@ interface Debugger
      *   }
      */
     public String log(String expectedString);
+    
+    /*
+     * Enables and disables the BuiltInTester
+     * Has 0 arguments
+     *
+     * Example Usage:
+     *     BuiltInTester.enable();
+     */
+     
+    public void enable();
+  
+    public void disable();
 }
