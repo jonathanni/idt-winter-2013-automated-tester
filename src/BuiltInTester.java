@@ -1,4 +1,4 @@
-public class BuiltInTester
+public class BuiltInTester implements Debugger
 {
     public static void main(String args[])
     {
