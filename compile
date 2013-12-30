@@ -1,0 +1,24 @@
+#!/bin/bash
+
+for i in $(find src/ -type d);
+  do
+  count=`ls -1 $i/*.java 2>/dev/null | wc -l`
+  if [ $count != 0 ]; then echo; fi
+  echo "$count JAVA files found in $i:"
+
+  if [ $count != 0 ]
+  then
+    ls -1 $i/*.java
+    echo
+    javac -g -cp src/ $i/*.java
+
+    # bin/ counterpart
+    bdir="bin/${i:4}"
+
+    if [ ! -d $bdir ]
+    then mkdir -p $bdir
+    fi
+
+    mv $i/*.class "$bdir"
+  fi
+done;

@@ -1,0 +1,111 @@
+++ find src/ -name '*.java'
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/phs1437/debugger/BuiltInTester.java
+++ dirname src/com/phs1437/debugger/BuiltInTester.java
++ sdir=src/com/phs1437/debugger
++ bdir=bin/com/phs1437/debugger
++ '[' '!' -d bin/com/phs1437/debugger ']'
++ mkdir bin/com/phs1437/debugger
+mkdir: cannot create directory ‘bin/com/phs1437/debugger’: No such file or directory
+++ basename src/com/phs1437/debugger/BuiltInTester.java .java
++ mv src/com/phs1437/debugger/BuiltInTester.class bin/com/phs1437/debugger
+mv: cannot move ‘src/com/phs1437/debugger/BuiltInTester.class’ to ‘bin/com/phs1437/debugger’: No such file or directory
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/phs1437/debugger/Debugger.java
+++ dirname src/com/phs1437/debugger/Debugger.java
++ sdir=src/com/phs1437/debugger
++ bdir=bin/com/phs1437/debugger
++ '[' '!' -d bin/com/phs1437/debugger ']'
++ mkdir bin/com/phs1437/debugger
+mkdir: cannot create directory ‘bin/com/phs1437/debugger’: No such file or directory
+++ basename src/com/phs1437/debugger/Debugger.java .java
++ mv src/com/phs1437/debugger/Debugger.class bin/com/phs1437/debugger
+mv: cannot move ‘src/com/phs1437/debugger/Debugger.class’ to ‘bin/com/phs1437/debugger’: No such file or directory
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/framework/Mode.java
+++ dirname src/com/idt/contest/highschool/winter2014/framework/Mode.java
++ sdir=src/com/idt/contest/highschool/winter2014/framework
++ bdir=bin/com/idt/contest/highschool/winter2014/framework
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/framework ']'
+++ basename src/com/idt/contest/highschool/winter2014/framework/Mode.java .java
++ mv src/com/idt/contest/highschool/winter2014/framework/Mode.class bin/com/idt/contest/highschool/winter2014/framework
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/framework/BatchMode.java
+++ dirname src/com/idt/contest/highschool/winter2014/framework/BatchMode.java
++ sdir=src/com/idt/contest/highschool/winter2014/framework
++ bdir=bin/com/idt/contest/highschool/winter2014/framework
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/framework ']'
+++ basename src/com/idt/contest/highschool/winter2014/framework/BatchMode.java .java
++ mv src/com/idt/contest/highschool/winter2014/framework/BatchMode.class bin/com/idt/contest/highschool/winter2014/framework
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/framework/MenuMode.java
+++ dirname src/com/idt/contest/highschool/winter2014/framework/MenuMode.java
++ sdir=src/com/idt/contest/highschool/winter2014/framework
++ bdir=bin/com/idt/contest/highschool/winter2014/framework
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/framework ']'
+++ basename src/com/idt/contest/highschool/winter2014/framework/MenuMode.java .java
++ mv src/com/idt/contest/highschool/winter2014/framework/MenuMode.class bin/com/idt/contest/highschool/winter2014/framework
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/framework/ClassCaster.java
+++ dirname src/com/idt/contest/highschool/winter2014/framework/ClassCaster.java
++ sdir=src/com/idt/contest/highschool/winter2014/framework
++ bdir=bin/com/idt/contest/highschool/winter2014/framework
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/framework ']'
+++ basename src/com/idt/contest/highschool/winter2014/framework/ClassCaster.java .java
++ mv src/com/idt/contest/highschool/winter2014/framework/ClassCaster.class bin/com/idt/contest/highschool/winter2014/framework
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/framework/FrameworkConstants.java
+++ dirname src/com/idt/contest/highschool/winter2014/framework/FrameworkConstants.java
++ sdir=src/com/idt/contest/highschool/winter2014/framework
++ bdir=bin/com/idt/contest/highschool/winter2014/framework
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/framework ']'
+++ basename src/com/idt/contest/highschool/winter2014/framework/FrameworkConstants.java .java
++ mv src/com/idt/contest/highschool/winter2014/framework/FrameworkConstants.class bin/com/idt/contest/highschool/winter2014/framework
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/Main.java
+++ dirname src/com/idt/contest/highschool/winter2014/Main.java
++ sdir=src/com/idt/contest/highschool/winter2014
++ bdir=bin/com/idt/contest/highschool/winter2014
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014 ']'
+++ basename src/com/idt/contest/highschool/winter2014/Main.java .java
++ mv src/com/idt/contest/highschool/winter2014/Main.class bin/com/idt/contest/highschool/winter2014
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/codetotest/ByteUtility.java
+++ dirname src/com/idt/contest/highschool/winter2014/codetotest/ByteUtility.java
++ sdir=src/com/idt/contest/highschool/winter2014/codetotest
++ bdir=bin/com/idt/contest/highschool/winter2014/codetotest
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/codetotest ']'
+++ basename src/com/idt/contest/highschool/winter2014/codetotest/ByteUtility.java .java
++ mv src/com/idt/contest/highschool/winter2014/codetotest/ByteUtility.class bin/com/idt/contest/highschool/winter2014/codetotest
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/codetotest/MathUtility.java
+++ dirname src/com/idt/contest/highschool/winter2014/codetotest/MathUtility.java
++ sdir=src/com/idt/contest/highschool/winter2014/codetotest
++ bdir=bin/com/idt/contest/highschool/winter2014/codetotest
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/codetotest ']'
+++ basename src/com/idt/contest/highschool/winter2014/codetotest/MathUtility.java .java
++ mv src/com/idt/contest/highschool/winter2014/codetotest/MathUtility.class bin/com/idt/contest/highschool/winter2014/codetotest
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/codetotest/TimeUtility.java
+++ dirname src/com/idt/contest/highschool/winter2014/codetotest/TimeUtility.java
++ sdir=src/com/idt/contest/highschool/winter2014/codetotest
++ bdir=bin/com/idt/contest/highschool/winter2014/codetotest
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/codetotest ']'
+++ basename src/com/idt/contest/highschool/winter2014/codetotest/TimeUtility.java .java
++ mv src/com/idt/contest/highschool/winter2014/codetotest/TimeUtility.class bin/com/idt/contest/highschool/winter2014/codetotest
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/codetotest/StringUtility.java
+++ dirname src/com/idt/contest/highschool/winter2014/codetotest/StringUtility.java
++ sdir=src/com/idt/contest/highschool/winter2014/codetotest
++ bdir=bin/com/idt/contest/highschool/winter2014/codetotest
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/codetotest ']'
+++ basename src/com/idt/contest/highschool/winter2014/codetotest/StringUtility.java .java
++ mv src/com/idt/contest/highschool/winter2014/codetotest/StringUtility.class bin/com/idt/contest/highschool/winter2014/codetotest
++ for i in '$(find src/ -name "*.java")'
++ javac -cp src/ src/com/idt/contest/highschool/winter2014/codetotest/MazeGenerator.java
+++ dirname src/com/idt/contest/highschool/winter2014/codetotest/MazeGenerator.java
++ sdir=src/com/idt/contest/highschool/winter2014/codetotest
++ bdir=bin/com/idt/contest/highschool/winter2014/codetotest
++ '[' '!' -d bin/com/idt/contest/highschool/winter2014/codetotest ']'
+++ basename src/com/idt/contest/highschool/winter2014/codetotest/MazeGenerator.java .java
++ mv src/com/idt/contest/highschool/winter2014/codetotest/MazeGenerator.class bin/com/idt/contest/highschool/winter2014/codetotest
