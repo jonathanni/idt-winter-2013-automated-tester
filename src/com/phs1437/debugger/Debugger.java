@@ -8,10 +8,8 @@
  */
 package com.phs1437.debugger;
 
-interface Debugger 
+public interface Debugger 
 {
-    public void enable();
-
     /*
      * Creates the basic test.
      * Has 3 arguments:
@@ -43,7 +41,7 @@ interface Debugger
      *       return true;
      *   }
      */
-    public String log(String expectedString);
+    public void log(String expectedString);
     
     /*
      * Enables and disables the BuiltInTester

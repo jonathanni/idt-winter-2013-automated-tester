@@ -9,6 +9,7 @@ for i in $(find src/ -type d);
   if [ $count != 0 ]
   then
     ls -1 $i/*.java
+
     echo
     javac -g -cp src/ $i/*.java
 
@@ -19,6 +20,11 @@ for i in $(find src/ -type d);
     then mkdir -p $bdir
     fi
 
-    mv $i/*.class "$bdir"
+    set -x
+    mv -fv  $i/*.class "$bdir"
+    { set +x; } 2>/dev/null
   fi
 done;
+
+# This is extremely peculiar but it must be done: if you can find a solution please fix it
+rm src/com/idt/contest/highschool/winter2014/framework/FrameworkConstants.class
