@@ -41,7 +41,7 @@ public class BuiltInTester implements Debugger
 		else
 			disable();
 	}
-
+/*
 	public void expecting(int inputValue, int possibleValue,
 			String expectedString, String variableID)
 	{
@@ -91,19 +91,19 @@ public class BuiltInTester implements Debugger
 			String expectedString, String variableID)
 	{
 	}
-
+*/
 	/**
 	 * Test function: allows the variable to change, being tested only when the
 	 * log function is called.
 	 */
 
-	public void expectingMutable(Object mutableInputValue,
+	public void expecting(Object mutableInputValue,
 			Object mutablePossibleValue, String expectedString,
 			String variableID)
 	{
 	}
 
-	public void expectingMutable(Object[] mutableInputValue,
+	public void expecting(Object[] mutableInputValue,
 			Object[] mutablePossibleValue, String expectedString,
 			String variableID)
 	{
