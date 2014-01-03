@@ -41,57 +41,7 @@ public class BuiltInTester implements Debugger
 		else
 			disable();
 	}
-/*
-	public void expecting(int inputValue, int possibleValue,
-			String expectedString, String variableID)
-	{
-	}
 
-	public void expecting(byte inputValue, byte possibleValue,
-			String expectedString, String variableID)
-	{
-	}
-
-	public void expecting(short inputValue, short possibleValue,
-			String expectedString, String variableID)
-	{
-	}
-
-	public void expecting(long inputValue, long possibleValue,
-			String expectedString, String variableID)
-	{
-	}
-
-	public void expecting(float inputValue, float possibleValue,
-			String expectedString, String variableID)
-	{
-	}
-
-	public void expecting(double inputValue, double possibleValue,
-			String expectedString, String variableID)
-	{
-	}
-
-	public void expecting(boolean inputValue, boolean possibleValue,
-			String expectedString, String variableID)
-	{
-	}
-
-	public void expecting(char inputValue, char possibleValue,
-			String expectedString, String variableID)
-	{
-	}
-
-	public void expecting(String inputValue, String possibleValue,
-			String expectedString, String variableID)
-	{
-	}
-
-	public void expecting(int[] inputValue, int[] possibleValue,
-			String expectedString, String variableID)
-	{
-	}
-*/
 	/**
 	 * Test function: allows the variable to change, being tested only when the
 	 * log function is called.
@@ -101,6 +51,11 @@ public class BuiltInTester implements Debugger
 			Object mutablePossibleValue, String expectedString,
 			String variableID)
 	{
+	    givenValues.put(variableID, mutableInputValue);
+		ArrayList<Object> tempList = new ArrayList<Object>();
+		tempList.add(mutablePossibleValue);
+		
+		exptectedValues.put(expectedString, tempList);
 	}
 
 	public void expecting(Object[] mutableInputValue,
