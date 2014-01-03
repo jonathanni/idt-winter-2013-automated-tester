@@ -18,6 +18,8 @@ public interface Debugger
 	 * 
 	 * TODO: There is probably a better way of doing this. Find what that is.
 	 */
+	 
+	 /*
 	public void expecting(int inputValue, int possibleValue,
 			String expectedString, String variableID);
 
@@ -47,12 +49,12 @@ public interface Debugger
 
 	public void expecting(int[] inputValue, int[] possibleValue,
 			String expectedString, String variableID);
-
-	public void expectingMutable(Object mutableInputValue,
+*/
+	public void expecting(Object mutableInputValue,
 			Object mutablePossibleValue, String expectedString,
 			String variableID);
 	
-	public void expectingMutable(Object[] mutableInputValue,
+	public void expecting(Object[] mutableInputValue,
 			Object[] mutablePossibleValue, String expectedString,
 			String variableID);
 
