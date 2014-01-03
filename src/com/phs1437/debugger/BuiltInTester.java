@@ -19,7 +19,8 @@ public class BuiltInTester implements Debugger
 	private boolean isEnabled;
 
 	private HashMap<String, ArrayList<Output>> expectedValues = new HashMap<String, ArrayList<Output>>();
-	private HashMap<String, Object> givenValues = new HashMap<String, Object>();
+	//Mapping a input id to a value
+	private HashMap<String, Object[]> givenValues = new HashMap<String, Object>();
 	private HashMap<String, String> variableResidences = new HashMap<String, String>();
 
 	/**
@@ -53,7 +54,9 @@ public class BuiltInTester implements Debugger
 			Class<?> type)
 	{
 		// Put the given variable value assigned to a variableID
-		givenValues.put(variableID, inputValue);
+		Object tempInputValueArray[1];
+		tempInputValueArray[0] = inputValue;
+		givenValues.put(variableID, tempInputValueArray);
 
 		// Put the expected variable value with the expected String assigned to
 		// a variableID
@@ -70,10 +73,16 @@ public class BuiltInTester implements Debugger
 
 	public void expecting(Object[] mutableInputValue,
 			Object[] mutablePossibleValue, String expectedString,
-			String variableID, String functionID, Class<?> type)
+			String variableID, String functionID, Class<?> type, int numInputs, int numOutputs)
 	{
 		
+		givenValues.put(expectedString, mutableInputValue);
+		ArrayList<Output> tempList = new ArrayList<Output>();
+		for(int i = 0; i<numOutputs; i++){
+		    tempList.add(new Output(mutablePossibleValue[i], expectedString, type))
+		}
 		
+		variableResidences(variableID, functionID);
 	}
 
 	/*
