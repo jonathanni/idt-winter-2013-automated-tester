@@ -2,7 +2,6 @@ package com.phs1437.debugger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /*
  * TODO: Implement tracking of symbols in code
