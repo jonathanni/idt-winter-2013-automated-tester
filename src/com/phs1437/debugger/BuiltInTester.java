@@ -1,4 +1,4 @@
-package com.phs1437.debugger;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ public class BuiltInTester implements Debugger
 
 	private HashMap<String, ArrayList<Output>> expectedValues = new HashMap<String, ArrayList<Output>>();
 	//Mapping a input id to a value
-	private HashMap<String, Object[]> givenValues = new HashMap<String, Object>();
+	private HashMap<String, Object[]> givenValues = new HashMap<String, Object[]>();
 	private HashMap<String, String> variableResidences = new HashMap<String, String>();
 
 	/**
@@ -54,7 +54,7 @@ public class BuiltInTester implements Debugger
 			Class<?> type)
 	{
 		// Put the given variable value assigned to a variableID
-		Object tempInputValueArray[1];
+		Object[] tempInputValueArray = new Object[1];
 		tempInputValueArray[0] = inputValue;
 		givenValues.put(variableID, tempInputValueArray);
 
@@ -79,10 +79,10 @@ public class BuiltInTester implements Debugger
 		givenValues.put(expectedString, mutableInputValue);
 		ArrayList<Output> tempList = new ArrayList<Output>();
 		for(int i = 0; i<numOutputs; i++){
-		    tempList.add(new Output(mutablePossibleValue[i], expectedString, type))
+		    tempList.add(new Output(mutablePossibleValue[i], expectedString, type));
 		}
 		
-		variableResidences(variableID, functionID);
+		variableResidences.put(variableID, functionID);
 	}
 
 	/*
