@@ -1,3 +1,5 @@
+package com.phs1437.debugger;
+
 /*
  * Debugger Interface
  * ~~~~~~~~~~~~~~~~~~~
@@ -6,7 +8,7 @@
  * Copyright: (c) 2013 by Diwakar Ganesan, Kent Ma, Jonathan Ni
  * License: spaghetti, see LICENSE for details
  */
-package com.phs1437.debugger;
+
 
 public interface Debugger
 {
@@ -56,7 +58,7 @@ public interface Debugger
 
 	public void expecting(Object[] mutableInputValue,
 			Object[] mutablePossibleValue, String expectedString,
-			String variableID, String functionID, Class<?> type);
+			String variableID, String functionID, Class<?> type, int numInputs, int numOutputs);
 
 	/*
 	 * Logs :field:`expectedString` Example usage: if (inputValue > 2) {
