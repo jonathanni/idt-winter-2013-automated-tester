@@ -1,5 +1,6 @@
 package com.phs1437.debugger;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -19,8 +20,8 @@ public class BuiltInTester implements Debugger
 	private boolean isEnabled;
 
 	private HashMap<String, ArrayList<Output>> expectedValues = new HashMap<String, ArrayList<Output>>();
-	//Mapping a input id to a value
-	private HashMap<String, Object[]> givenValues = new HashMap<String, Object[]>();
+	// Mapping a input id to a value
+	private HashMap<String, Object> givenValues = new HashMap<String, Object>();
 	private HashMap<String, String> variableResidences = new HashMap<String, String>();
 
 	/**
@@ -49,14 +50,12 @@ public class BuiltInTester implements Debugger
 	 * log function is called.
 	 */
 
-	public void expecting(Object inputValue, Object possibleValue,
+	public int expecting(Object inputValue, Object possibleValue,
 			String expectedString, String variableID, String functionID,
 			Class<?> type)
 	{
 		// Put the given variable value assigned to a variableID
-		Object[] tempInputValueArray = new Object[1];
-		tempInputValueArray[0] = inputValue;
-		givenValues.put(variableID, tempInputValueArray);
+		givenValues.put(variableID, inputValue);
 
 		// Put the expected variable value with the expected String assigned to
 		// a variableID
@@ -69,20 +68,39 @@ public class BuiltInTester implements Debugger
 
 		// Assign a variableID to a functionID
 		variableResidences.put(variableID, functionID);
+
+		return 0;
 	}
 
-	public void expecting(Object[] mutableInputValue,
-			Object[] mutablePossibleValue, String expectedString,
-			String variableID, String functionID, Class<?> type, int numInputs, int numOutputs)
+	public int expecting(Object[] inputValue, Object[] possibleValue,
+			String expectedString, String variableID, String functionID,
+			Class<?> type)
 	{
-		
-		givenValues.put(expectedString, mutableInputValue);
-		ArrayList<Output> tempList = new ArrayList<Output>();
-		for(int i = 0; i<numOutputs; i++){
-		    tempList.add(new Output(mutablePossibleValue[i], expectedString, type));
+		if (inputValue.length != possibleValue.length)
+		{
+			Logger.logError("Input and expecting value arrays do not match");
+			return 1;
 		}
-		
-		variableResidences.put(variableID, functionID);
+
+		try
+		{
+			givenValues.put(expectedString, inputValue);
+
+			ArrayList<Output> tempList;
+			if ((tempList = expectedValues.get(variableID)) == null)
+				tempList = new ArrayList<Output>();
+
+			tempList.add(new Output(possibleValue, expectedString, type));
+			expectedValues.put(variableID, tempList);
+
+			variableResidences.put(variableID, functionID);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			return 1;
+		}
+
+		return 0;
 	}
 
 	/*
@@ -93,11 +111,109 @@ public class BuiltInTester implements Debugger
 	/**
 	 * Log what is expected (given in the expecting* functions) and if the block
 	 * of code PASSED or FAILED.
+	 * 
+	 * @param variableID
+	 *            the ID of the variable to test for set in the expecting
+	 *            functions
+	 * @param expectedString
+	 *            the message String that is expected
 	 */
-	public void log(String expectedString)
+	public int log(String variableID, String expectedString)
 	{
+		// Find the expected output associated with the value
+		ArrayList<Output> expectedOutputs = expectedValues.get(variableID);
+		String functionID = variableResidences.get(variableID);
+
+		for (Output i : expectedOutputs)
+		{
+			if (i.getType().isArray())
+			{
+				Object givenValArr = givenValues.get(variableID);
+				Object expectedValArr = i.getExpectedValue();
+
+				boolean match = true;
+				for (int j = 0; j < Array.getLength(givenValArr); j++)
+					if (!i.getType()
+							.getEnclosingClass()
+							.cast(Array.get(givenValArr, j))
+							.equals(i.getType().getEnclosingClass()
+									.cast(Array.get(expectedValArr, j))))
+					{
+						match = false;
+						break;
+					}
+
+				// Given and expected values have a match
+				if (match)
+				{
+					// Give a string representation of the values
+					StringBuilder inputValue = new StringBuilder();
+					inputValue.append("[");
+					for (int j = 0; j < Array.getLength(givenValArr); j++)
+						inputValue.append(i.getType().getEnclosingClass()
+								.cast(Array.get(givenValArr, j)).toString()
+								+ " ");
+					inputValue.append("]");
+
+					// Check if the expected strings match
+					if (i.getExpectedString().equals(expectedString))
+					{
+						logInternal(true, inputValue.toString(),
+								expectedString, i.getExpectedString(),
+								variableID, functionID);
+						return 0;
+					} else
+					{
+						logInternal(false, inputValue.toString(),
+								expectedString, i.getExpectedString(),
+								variableID, functionID);
+						return 1;
+					}
+				}
+			} else
+			{
+				Object givenVal = givenValues.get(variableID);
+				Object expectedVal = i.getExpectedValue();
+
+				boolean match = true;
+				if (!i.getType().cast(givenVal)
+						.equals(i.getType().cast(expectedVal)))
+					match = false;
+
+				// Given and expected values have a match
+				if (match)
+				{
+					// Check if the expected strings match
+					if (i.getExpectedString().equals(expectedString))
+					{
+						logInternal(true,
+								i.getType().cast(givenVal).toString(),
+								expectedString, i.getExpectedString(),
+								variableID, functionID);
+						return 0;
+					} else
+					{
+						logInternal(false, i.getType().cast(givenVal)
+								.toString(), expectedString,
+								i.getExpectedString(), variableID, functionID);
+						return 1;
+					}
+				}
+			}
+		}
+
 		System.out.println(expectedString);
 		// TODO: Implement piping to any OutputStream
+		return -1;
+	}
+
+	private void logInternal(boolean passed, String inputVal, String inputStr,
+			String expectedStr, String variableID, String functionID)
+	{
+		Logger.logInfo(String
+				.format("Variable %s %s in function %s with value %s, given %s expecting %s",
+						variableID, passed ? "PASSED" : "FAILED", functionID,
+						inputVal, inputStr, expectedStr));
 	}
 
 	/**
@@ -131,15 +247,15 @@ public class BuiltInTester implements Debugger
 
 class Output
 {
-	private Object expectedValue;
-	private String expectedString;
-	private Class<?> type;
+	private final Object expectedValue;
+	private final String expectedString;
+	private final Class<?> type;
 
 	public Output(Object ev, String es, Class<?> type)
 	{
-		setExpectedValue(ev);
-		setExpectedString(es);
-		setType(type);
+		this.expectedValue = ev;
+		this.expectedString = new String(es);
+		this.type = type;
 	}
 
 	public Object getExpectedValue()
@@ -147,29 +263,14 @@ class Output
 		return expectedValue;
 	}
 
-	public void setExpectedValue(Object expectedValue)
-	{
-		this.expectedValue = expectedValue;
-	}
-
 	public String getExpectedString()
 	{
 		return expectedString;
 	}
 
-	public void setExpectedString(String expectedString)
-	{
-		this.expectedString = expectedString;
-	}
-
 	public Class<?> getType()
 	{
 		return type;
-	}
-
-	public void setType(Class<?> type)
-	{
-		this.type = type;
 	}
 
 	@Override
