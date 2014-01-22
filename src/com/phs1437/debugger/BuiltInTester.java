@@ -107,7 +107,13 @@ public class BuiltInTester implements Debugger
             Logger.logError("Input and expecting value arrays do not match");
             return 1;
         }
+        
+    
+        int returnCode = expecting(inputValue, possibleValue, expectedString, variableID, functionID, type);
+        if(returnCode = 1) return 1
+        
 
+/*
         try {
             givenValues.put(expectedString, inputValue);
 
@@ -123,6 +129,7 @@ public class BuiltInTester implements Debugger
             e.printStackTrace();
             return 1;
         }
+        */
 
         return 0;
     }
