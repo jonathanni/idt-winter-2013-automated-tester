@@ -1,6 +1,7 @@
 package com.idt.contest.highschool.winter2014.codetotest;
 
 import com.idt.contest.highschool.winter2014.framework.FrameworkConstants;
+import com.phs1437.debugger.BuiltInTester;
 
 /**
  * Class containing byte related utility methods
@@ -13,11 +14,18 @@ public class ByteUtility {
 	 * @param b - byte to translate to binary string (e.g. 57)
 	 * @return - String binary representation of byte, 2's compliment if the byte is negative
 	 */
+    public static BuiltInTester tester = new BuiltInTester(true);
 	public String byteToBinytaryString(byte b) {
 		
 		byte remainder = 0;
 		byte number = b;
 		String binaryRepresentation = "";
+
+        tester.expecting(b, 0, "true", "parameter", "bytetobinytarystring", byte.class, byte.class);
+        tester.expecting(remainder, 0, "true", "remainder", "bytetobinytarystring", byte.class, byte.class);
+
+        tester.expecting(number, 0, "true", "number", "bytetobinytarystring", byte.class, byte.class);
+        tester.expecting(binaryRepresentation, 0, "true","binaryRepresentation", "bytetobinytarystring", String.class, String.class);
 		
 		// handle the case of zero 
 		if (b == 0) {
@@ -36,11 +44,13 @@ public class ByteUtility {
 			//
 			//
 			//
+            tester.log("parameter", b);
 			return FrameworkConstants.ONE_STRING;
 		}
 		
 		// number is greater than zero 
 		while (number != 0) {	
+            tester.log("number", remainder);
 			remainder = (byte) (number % 2);
 			number = (byte) (number / 2); 
 			
@@ -48,6 +58,7 @@ public class ByteUtility {
 			if (remainder == 0) {
 				// if we have a zero, add a zero to the front of the builder string
 				binaryRepresentation = FrameworkConstants.ZERO_STRING + binaryRepresentation;
+                tester.log("remainder", remainder);
 			} else {
 				// if we have any value other than zero, add a one to the front of the builder string
 				binaryRepresentation = FrameworkConstants.ONE_STRING + binaryRepresentation;
@@ -58,6 +69,10 @@ public class ByteUtility {
 		if (b < 0) {
 			StringUtility su = new StringUtility();
 			binaryRepresentation = su.binaryByteTwosCompliment(binaryRepresentation);
+            tester.log("binaryRepresentation", binaryRepresentation);
+
+
+
 		}
 		
 		return binaryRepresentation;
@@ -76,14 +91,26 @@ public class ByteUtility {
 	public byte shiftByte(byte b, int placesToShift, boolean left) {
 		
 		byte shiftedByte;
-		
+	    tester.expecting(left, true, "true", "left", "shiftByte", boolean.class, boolean.class);
+	    tester.expecting(left, false, "true", "left", "shiftByte", boolean.class, boolean.class);
+	
 		if (placesToShift > FrameworkConstants.BITS_IN_BYTE || placesToShift < 0) {
+            tester.log("placesToShift", placesToShift);
+            tester.log("left", left);
 			shiftedByte = 0;
 		} else if (left) {
 			shiftedByte = (byte) (b << placesToShift);
+            tester.log("left", left);
 		} else {
 			shiftedByte = (byte) (b >> placesToShift);
+            tester.log("left", left);
 		}
+	    tester.expecting(shiftedByte, FrameworkConstants.BITS_IN_BYTE, "true",
+                "shiftedByte", "shiftedByte", byte.class, byte.class);
+	    tester.expecting(placesToShift, FrameworkConstants.BITS_IN_BYTE, "true",
+                "placesToShift", "shiftedByte", int.class, int.class);
+        tester.log("shiftedByte", shiftedByte);
+
 		
 		return shiftedByte;
 	}
