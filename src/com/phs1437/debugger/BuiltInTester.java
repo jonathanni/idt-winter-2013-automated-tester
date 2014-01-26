@@ -1,11 +1,6 @@
 /**
  * @author Jonathan Ni, Diwakar Ganesan, Kent Ma
  */
-package com.phs1437.debugger;
-
-/**
- * @author Jonathan Ni, Diwakar Ganesan, Kent Ma
- */
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -53,27 +48,28 @@ public class BuiltInTester implements Debugger {
 	 * Test function: allows the variable to change, being tested only when the
 	 * log function is called.
 	 * 
-	 * @param mutablePossibleValue
-	 *            A possible value for the variable.
+	
+	 * @param inputValue
+	 *				The value that is being tested. 
 	 * 
-	 * @param expectedOutput
-	 *            Specifies the string needed to be logged in order to pass the
-	 *            test. Use {@link #log(String)} to actually log the string
-	 *            specified for this.
-	 * 
-	 * @param variableID
-	 *            A unique string that identifies the variable inputted. This is
-	 *            used to differentiate between different tests simultaneously
-	 *            running for {@link #log(String)}
+	 * @param possibleValue
+	 * 				A possible value for the variable that is being tested. The tester
+	 * 				will only function if the current value of teh variable matches
+	 * 				one of the possible values given.
 	 * 
 	 * @param functionID
 	 *            A unique string to identify the function the tested code
 	 *            resided in.
-	 * 
-	 * @param type
+	 * @param expectedOutput
+	 * 			  The expectedOutput that matches with the possibleValue given.
+	 * 		      For example, if the function finds the square root of a number,
+	 * 			  if possibleValue is 64, expectedOutput would be 8
+	 * @param inputType
 	 *            The data type of the variable to be tested. Accepts array
 	 *            types.
-	 * 
+	 * @param outputType
+	 *            The data type of the output. Accepts array
+	 *            types.
 	 * @return 0 on success and 1 on failure
 	 * 
 	 */
@@ -86,7 +82,7 @@ public class BuiltInTester implements Debugger {
 
 		// Put the expected variable value with the expected String assigned to
 		// a variableID
-
+		 
 		ArrayList<Output> tempList;
 		if ((tempList = expectedValues.get(variableID)) == null)
 			tempList = new ArrayList<Output>();
@@ -104,21 +100,7 @@ public class BuiltInTester implements Debugger {
 		return 0;
 	}
 
-	// TODO Fix this implementation
-	/*
-	 * public int expecting(Object[] inputValue, Object[] possibleValue, String
-	 * expectedOutput, String variableID, String functionID, Class<?> type) { if
-	 * (inputValue.length != possibleValue.length) {
-	 * Logger.logError("Input and expecting value arrays do not match"); return
-	 * 1; }
-	 * 
-	 * 
-	 * int returnCode = expecting(inputValue, possibleValue, expectedOutput,
-	 * variableID, functionID, type); if(returnCode == 1) return 1;
-	 * 
-	 * 
-	 * return 0; }
-	 */
+	
 	/**
 	 * Log what is expected (given in the expecting* functions) and if the block
 	 * of code PASSED or FAILED.
@@ -126,22 +108,44 @@ public class BuiltInTester implements Debugger {
 	 * @param variableID
 	 *            the ID of the variable to test for set in the expecting
 	 *            functions
-	 * @param expectedOutput
-	 *            the message String that is expected
+	 * @param actualOutput
+	 *            The value that the user logs into the system.
+	 *           
 	 */
 	public int log(String variableID, Object actualOutput) {
 
+		/*
+		 *  The list of all Outputs associated with variableID.
+		 *  One Output includes a possibleValue, and an output associated
+		 *  with that input. Also includes the type of variable for both values.
+		 */
+		
 		ArrayList<Output> expectedOutputs = expectedValues.get(variableID);
 		String functionID = variableResidences.get(variableID);
-
+		
+		// Iterate through all the outputs trying to find a match with the log
 		for (Output i : expectedOutputs) {
-
+			
+			
+			//If the Output object contains a possibleValue that is an array, we must
+			//check each element of the array to ensure equality.
+			
 			if (i.getInputType().isArray()) {
-
+				
+				//Fetch the current value of the variable.
 				Object givenValArr = givenValues.get(variableID);
+				
+				//Fetch one of the possible values for that variable.
 				Object expectedValArr = i.getPossibleInputValue();
 
 				boolean match = true;
+				
+				/*
+				 *  Iterate through each element of the givenValArr array and the expectedValArr array to check for equality.
+				 *  This is because we need to ensure that the current value of the variable (givenValArr) is one of the
+				 *  possible input values. If its not, then the tester does not print anything.
+				 */
+				
 				for (int j = 0; j < Array.getLength(givenValArr); j++) {
 					if (!i.getInputType()
 							.getComponentType()
@@ -152,43 +156,14 @@ public class BuiltInTester implements Debugger {
 						break;
 					}
 				}
+				
 				// Given and expected values have a match
 				if (match) {
-					if (!i.getOutputType().isArray()) {
-						// Give a string representation of the values
-						StringBuilder inputValue = new StringBuilder();
-						inputValue.append("[");
-						for (int j = 0; j < Array.getLength(givenValArr); j++)
-							inputValue.append(i.getInputType()
-									.getComponentType()
-									.cast(Array.get(givenValArr, j)).toString()
-									+ " ");
-						inputValue.append("]");
-
-						// Check if the expected objects match
-						if (i.getExpectedOutput().equals(actualOutput)) {
-							logInternal(
-									true,
-									inputValue.toString(),
-									i.getOutputType().cast(actualOutput)
-											.toString(),
-									i.getOutputType()
-											.cast(i.getExpectedOutput())
-											.toString(), variableID, functionID);
-							return 0;
-						} else {
-							logInternal(
-									false,
-									inputValue.toString(),
-									i.getOutputType().cast(actualOutput)
-											.toString(),
-									i.getOutputType()
-											.cast(i.getExpectedOutput())
-											.toString(), variableID, functionID);
-							return 1;
-						}
-					} else {
-						// Give a string representation of the values
+					//Now, we check if the output is an array
+					if (i.getOutputType().isArray()) {
+						
+						// If the output is an array, we need to generate strings of the arrays, so the output is readable by humans.
+						
 						StringBuilder inputValue = new StringBuilder();
 						inputValue.append("[");
 						for (int j = 0; j < Array.getLength(givenValArr); j++)
@@ -218,8 +193,14 @@ public class BuiltInTester implements Debugger {
 									.toString()
 									+ " ");
 						expectedOutputString.append("]");
+						
+						
 						boolean test = true;
-						// Check if the expected objects match
+						
+						/*
+						 * Iterate through the expectedOutput (i.getExpectedOutput()) and actualOutput (the value logged by the user)
+						 * to check for a match.
+						 */
 						for (int j = 0; j < Array.getLength(i
 								.getExpectedOutput()); j++) {
 
@@ -234,6 +215,7 @@ public class BuiltInTester implements Debugger {
 							}
 						}
 
+						// Write appropiate log message to console
 						if (test) {
 							logInternal(true, inputValue.toString(),
 									actualOutputString.toString(),
@@ -245,6 +227,48 @@ public class BuiltInTester implements Debugger {
 									actualOutputString.toString(),
 									expectedOutputString.toString(),
 									variableID, functionID);
+							return 1;
+						}
+						
+						
+						
+					} else {
+						
+						// If the output is not an array, there is no need to build a string representation.
+						// However, the input is an array, so we still need a string representation of that.
+						
+						// Give a string representation of the values
+						StringBuilder inputValue = new StringBuilder();
+						inputValue.append("[");
+						for (int j = 0; j < Array.getLength(givenValArr); j++)
+							inputValue.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(givenValArr, j)).toString()
+									+ " ");
+						inputValue.append("]");
+
+						// Check if the expected objects match
+						if (i.getExpectedOutput().equals(actualOutput)) {
+						
+							// write appropriate log message
+							logInternal(
+									true,
+									inputValue.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(),
+									i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
+							return 0;
+						} else {
+							logInternal(
+									false,
+									inputValue.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(),
+									i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
 							return 1;
 						}
 					}
