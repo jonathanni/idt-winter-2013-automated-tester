@@ -12,93 +12,146 @@ import java.util.HashMap;
  * TODO: Implement code profiling (optional)
  */
 
+/**
+ * 
+ * DataTypeException is used by BuiltInTester to ensure that the data inputted is in the 
+ * correct format and type.
+ * 
+ * For example, if the user passes a multidimensional array, which is not supported by
+ * BuiltInTester, the DataTypeException will be thrown.
+ *
+ */
+class DataTypeException extends Exception {
+	String mistake;
+
+	// ----------------------------------------------
+	// Default constructor - initializes instance variable to unknown
+	public DataTypeException() {
+		super(); // call superclass constructor
+		mistake = "unknown";
+	}
+
+	// -----------------------------------------------
+	// Constructor receives some kind of message that is saved in an instance
+	// variable.
+	public DataTypeException(String err) {
+		super(err); // call super class constructor
+		mistake = err; // save message
+	}
+
+	// ------------------------------------------------
+	// public method, callable by exception catcher. It returns the error
+	// message.
+	public String getError() {
+		return mistake;
+	}
+}
+
 public class BuiltInTester implements Debugger {
 
-    /**
-     * Indicates whether or not the builtin tester is enabled.
-     */
+	/**
+	 * Indicates whether or not the builtin tester is enabled.
+	 */
 
-    private boolean isEnabled;
+	private boolean isEnabled;
 
-    private HashMap<String, ArrayList<Output>> expectedValues = new HashMap<String, ArrayList<Output>>();
-    // Mapping a input id to a value
-    private HashMap<String, Object> givenValues = new HashMap<String, Object>();
-    private HashMap<String, String> variableResidences = new HashMap<String, String>();
+	private HashMap<String, ArrayList<Output>> expectedValues = new HashMap<String, ArrayList<Output>>();
+	// Mapping a input id to a value
+	private HashMap<String, Object> givenValues = new HashMap<String, Object>();
+	private HashMap<String, String> variableResidences = new HashMap<String, String>();
 
-    /**
-     * Default constructor. Options enabled: false
-     */
+	/**
+	 * Default constructor. Options enabled: false
+	 */
 
-    public BuiltInTester() {
-        this(false);
-    }
+	public BuiltInTester() {
+		this(false);
+	}
 
-    /**
-     * Constructor with one argument. Options enabled: choice
-     */
+	/**
+	 * Constructor with one argument. Options enabled: choice
+	 */
 
-    public BuiltInTester(boolean enable) {
-        if (enable)
-            enable();
-        else
-            disable();
-    }
+	public BuiltInTester(boolean enable) {
+		if (enable)
+			enable();
+		else
+			disable();
+	}
 
-    /**
-     * Test function: allows the variable to change, being tested only when the
-     * log function is called.
-     * 
-    
-     * @param inputValue
-     *                The value that is being tested. 
-     * 
-     * @param possibleValue
-     *                 A possible value for the variable that is being tested. The tester
-     *                 will only function if the current value of teh variable matches
-     *                 one of the possible values given.
-     * 
-     * @param functionID
-     *            A unique string to identify the function the tested code
-     *            resided in.
-     * @param expectedOutput
-     *               The expectedOutput that matches with the possibleValue given.
-     *               For example, if the function finds the square root of a number,
-     *               if possibleValue is 64, expectedOutput would be 8
-     * @param inputType
-     *            The data type of the variable to be tested. Accepts array
-     *            types.
-     * @param outputType
-     *            The data type of the output. Accepts array
-     *            types.
-     * @return 0 on success and 1 on failure
-     * 
-     */
+	/**
+	 * Test function: allows the variable to change, being tested only when the
+	 * log function is called.
+	 * 
+	 * 
+	 * @param inputValue
+	 *            The value that is being tested.
+	 * 
+	 * @param possibleValue
+	 *            A possible value for the variable that is being tested. The
+	 *            tester will only function if the current value of the variable
+	 *            matches one of the possible values given.
+	 * 
+	 * @param functionID
+	 *            A unique string to identify the function the tested code
+	 *            resided in.
+	 * @param expectedOutput
+	 *            The output that matches with the given possibleValue For
+	 *            example, if the function finds the square root of a number, if
+	 *            possibleValue is 64, expectedOutput would be 8
+	 * @param inputType
+	 *            The data type of the variable to be tested. Accepts array
+	 *            types.
+	 * @param outputType
+	 *            The data type of the output. Accepts array types.
+	 * @return 0 on success and 1 on failure
+	 * @throws DataTypeException
+	 * 
+	 */
 
-    public int expecting(Object inputValue, Object possibleValue,
-            Object expectedOutput, String variableID, String functionID,
-            Class<?> inputType, Class<?> outputType) {
-        // Put the given variable value assigned to a variableID
-        givenValues.put(variableID, inputValue);
+	public int expecting(Object inputValue, Object possibleValue,
+			Object expectedOutput, String variableID, String functionID,
+			Class<?> inputType, Class<?> outputType) throws DataTypeException {
+		// Put the given variable value assigned to a variableID
+		if (inputType.isArray() && inputType.getComponentType().isArray()
+				|| outputType.isArray()
+				&& outputType.getComponentType().isArray()) {
+			isEnabled = false;
+			throw new DataTypeException("Cannot use multidimensional arrays");
+		}
 
-        // Put the expected variable value with the expected String assigned to
-        // a variableID
-         
-        ArrayList<Output> tempList;
-        if ((tempList = expectedValues.get(variableID)) == null)
-            tempList = new ArrayList<Output>();
+		if (inputType == int.class || inputType == float.class
+				|| inputType == double.class || inputType == boolean.class
+				|| inputType == float.class || inputType == byte.class
+				|| inputType == long.class || inputType == short.class
+				|| inputType == char.class || inputType == int[].class || inputType == float[].class
+				|| inputType == double[].class || inputType == boolean[].class
+				|| inputType == float[].class || inputType == byte[].class
+				|| inputType == long[].class || inputType == short[].class
+				|| inputType == char[].class){
+				throw new DataTypeException("Please pass object type instead of primitive type");
+		}
+		givenValues.put(variableID, inputValue);
 
-        // possibleValue is all the values the input could be, so inputType is
-        // the data type of possibleValue
-        tempList.add(new Output(possibleValue, expectedOutput, possibleValue.getClass(),
-                expectedOutput.getClass()));
+		// Put the expected variable value with the expected String assigned to
+		// a variableID
 
-        expectedValues.put(variableID, tempList);
+		ArrayList<Output> tempList;
+		if ((tempList = expectedValues.get(variableID)) == null)
+			tempList = new ArrayList<Output>();
 
-        // Assign a variableID to a functionID
-        variableResidences.put(variableID, functionID);
+		// possibleValue is all the values the input could be, so inputType is
+		// the data type of possibleValue
+		tempList.add(new Output(possibleValue, expectedOutput, inputType,
+				outputType));
 
-        return 0;
-    }
+		expectedValues.put(variableID, tempList);
+
+		// Assign a variableID to a functionID
+		variableResidences.put(variableID, functionID);
+
+		return 0;
+	}
 
     
     /**
