@@ -1,6 +1,7 @@
 package com.idt.contest.highschool.winter2014.codetotest;
 
 import com.idt.contest.highschool.winter2014.framework.FrameworkConstants;
+import com.phs1437.debugger.BuiltInTester;
 
 /**
  * Class containing String related utility methods
@@ -13,10 +14,15 @@ public class StringUtility {
 	 * @param stringToCheck - String to count vowels in
 	 * @return - int number of vowels in supplied String
 	 */
+    private static BuiltInTester tester = new BuiltInTester(true);
 	public int countVowels(String stringToCheck) {
 		
 		int vowelCount = 0;
 		char currentChar;
+
+        tester.expecting(vowelCount, 0, "false", "vowelcount", "countVowels", int.class, int.class);
+        tester.expecting(currentChar, 0, "false", "currentChar", "countVowels", char.class, char.class);
+
 		//
 		//
 		//
@@ -32,6 +38,8 @@ public class StringUtility {
 		//
 		//
 		char[] vowelArray = {'a','A','e','E','i','I','o','0','u','U'};
+        tester.expecting(vowelArray, new char[]{'a', 'A', 'e', 'E', 'i', 'I', 'o', '0', 'u', 'U'}, "false", "vowelArray", "countVowels", char[].class, char[].class);
+
 		
 		// must check string for null before processing 
 		if (stringToCheck == null) {
@@ -49,6 +57,7 @@ public class StringUtility {
 				}
 			}
 		}
+        tester.log("vowelArray", vowelArray);
 		
 		return vowelCount;
 	}
