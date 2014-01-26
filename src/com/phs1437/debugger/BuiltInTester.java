@@ -12,40 +12,6 @@ import java.util.HashMap;
  * TODO: Implement code profiling (optional)
  */
 
-/**
- * 
- * DataTypeException is used by BuiltInTester to ensure that the data inputted is in the 
- * correct format and type.
- * 
- * For example, if the user passes a multidimensional array, which is not supported by
- * BuiltInTester, the DataTypeException will be thrown.
- *
- */
-class DataTypeException extends Exception {
-	String mistake;
-
-	// ----------------------------------------------
-	// Default constructor - initializes instance variable to unknown
-	public DataTypeException() {
-		super(); // call superclass constructor
-		mistake = "unknown";
-	}
-
-	// -----------------------------------------------
-	// Constructor receives some kind of message that is saved in an instance
-	// variable.
-	public DataTypeException(String err) {
-		super(err); // call super class constructor
-		mistake = err; // save message
-	}
-
-	// ------------------------------------------------
-	// public method, callable by exception catcher. It returns the error
-	// message.
-	public String getError() {
-		return mistake;
-	}
-}
 
 public class BuiltInTester implements Debugger {
 
@@ -90,34 +56,36 @@ public class BuiltInTester implements Debugger {
 	 * @param possibleValue
 	 *            A possible value for the variable that is being tested. The
 	 *            tester will only function if the current value of the variable
-	 *            matches one of the possible values given.
-	 * 
-	 * @param functionID
-	 *            A unique string to identify the function the tested code
-	 *            resided in.
+	 *            matches one of the possible values given. It can be any type.
 	 * @param expectedOutput
 	 *            The output that matches with the given possibleValue For
 	 *            example, if the function finds the square root of a number, if
-	 *            possibleValue is 64, expectedOutput would be 8
+	 *            possibleValue is 64, expectedOutput would be 8. It can be any type.
+	 * @param variableID
+	 * 			  The name of the variable being tested. If the variable being tested is called x, this parameter's value should be "x"
+	 * @param functionID
+	 *            A unique string to identify the function the tested code
+	 *            resided in.
+
 	 * @param inputType
 	 *            The data type of the variable to be tested. Accepts array
 	 *            types.
 	 * @param outputType
 	 *            The data type of the output. Accepts array types.
 	 * @return 0 on success and 1 on failure
-	 * @throws DataTypeException
+	 * @throws IllegalArgumentException
 	 * 
 	 */
 
 	public int expecting(Object inputValue, Object possibleValue,
 			Object expectedOutput, String variableID, String functionID,
-			Class<?> inputType, Class<?> outputType) throws DataTypeException {
+			Class<?> inputType, Class<?> outputType) throws IllegalArgumentException {
 		// Put the given variable value assigned to a variableID
 		if (inputType.isArray() && inputType.getComponentType().isArray()
 				|| outputType.isArray()
 				&& outputType.getComponentType().isArray()) {
 			isEnabled = false;
-			throw new DataTypeException("Cannot use multidimensional arrays");
+			throw new IllegalArgumentException("Cannot use multidimensional arrays");
 		}
 
 		if (inputType == int.class || inputType == float.class
@@ -129,7 +97,7 @@ public class BuiltInTester implements Debugger {
 				|| inputType == float[].class || inputType == byte[].class
 				|| inputType == long[].class || inputType == short[].class
 				|| inputType == char[].class){
-				throw new DataTypeException("Please pass object type instead of primitive type");
+				throw new IllegalArgumentException("Please pass object type instead of primitive type");
 		}
 		givenValues.put(variableID, inputValue);
 
