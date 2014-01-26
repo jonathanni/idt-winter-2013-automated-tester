@@ -86,14 +86,15 @@ public class BuiltInTester implements Debugger {
 
 		// Put the expected variable value with the expected String assigned to
 		// a variableID
+
 		ArrayList<Output> tempList;
 		if ((tempList = expectedValues.get(variableID)) == null)
 			tempList = new ArrayList<Output>();
 
 		// possibleValue is all the values the input could be, so inputType is
 		// the data type of possibleValue
-		tempList.add(new Output(possibleValue, expectedOutput, inputType,
-				outputType));
+		tempList.add(new Output(possibleValue, expectedOutput, possibleValue.getClass(),
+				expectedOutput.getClass()));
 
 		expectedValues.put(variableID, tempList);
 
@@ -134,20 +135,18 @@ public class BuiltInTester implements Debugger {
 		String functionID = variableResidences.get(variableID);
 
 		for (Output i : expectedOutputs) {
-			
-			
+
 			if (i.getInputType().isArray()) {
 
 				Object givenValArr = givenValues.get(variableID);
 				Object expectedValArr = i.getPossibleInputValue();
 
 				boolean match = true;
-				for (int j = 0; j < Array.getLength(givenValArr); j++)
-				{
+				for (int j = 0; j < Array.getLength(givenValArr); j++) {
 					if (!i.getInputType()
-							.getEnclosingClass()
+							.getComponentType()
 							.cast(Array.get(givenValArr, j))
-							.equals(i.getInputType().getEnclosingClass()
+							.equals(i.getInputType().getComponentType()
 									.cast(Array.get(expectedValArr, j)))) {
 						match = false;
 						break;
@@ -161,7 +160,7 @@ public class BuiltInTester implements Debugger {
 						inputValue.append("[");
 						for (int j = 0; j < Array.getLength(givenValArr); j++)
 							inputValue.append(i.getInputType()
-									.getEnclosingClass()
+									.getComponentType()
 									.cast(Array.get(givenValArr, j)).toString()
 									+ " ");
 						inputValue.append("]");
@@ -188,7 +187,68 @@ public class BuiltInTester implements Debugger {
 											.toString(), variableID, functionID);
 							return 1;
 						}
+					} else {
+						// Give a string representation of the values
+						StringBuilder inputValue = new StringBuilder();
+						inputValue.append("[");
+						for (int j = 0; j < Array.getLength(givenValArr); j++)
+							inputValue.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(givenValArr, j)).toString()
+									+ " ");
+						inputValue.append("]");
+
+						StringBuilder actualOutputString = new StringBuilder();
+						actualOutputString.append("[");
+						for (int j = 0; j < Array.getLength(actualOutput); j++)
+							actualOutputString.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(actualOutput, j))
+									.toString()
+									+ " ");
+						actualOutputString.append("]");
+
+						StringBuilder expectedOutputString = new StringBuilder();
+						expectedOutputString.append("[");
+						for (int j = 0; j < Array.getLength(i
+								.getExpectedOutput()); j++)
+							expectedOutputString.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(i.getExpectedOutput(), j))
+									.toString()
+									+ " ");
+						expectedOutputString.append("]");
+						boolean test = true;
+						// Check if the expected objects match
+						for (int j = 0; j < Array.getLength(i
+								.getExpectedOutput()); j++) {
+
+							if (!i.getOutputType()
+									.getComponentType()
+									.cast(Array.get(i.getExpectedOutput(), j))
+									.equals(i.getOutputType()
+											.getComponentType()
+											.cast(Array.get(actualOutput, j)))) {
+								test = false;
+								break;
+							}
+						}
+
+						if (test) {
+							logInternal(true, inputValue.toString(),
+									actualOutputString.toString(),
+									expectedOutputString.toString(),
+									variableID, functionID);
+							return 0;
+						} else {
+							logInternal(false, inputValue.toString(),
+									actualOutputString.toString(),
+									expectedOutputString.toString(),
+									variableID, functionID);
+							return 1;
+						}
 					}
+
 				}
 			} else {
 				// load the givenValues and expectedValues to see if they match
@@ -196,7 +256,7 @@ public class BuiltInTester implements Debugger {
 				Object expectedVal = i.getPossibleInputValue();
 
 				boolean match = true;
-				System.out.println(givenVal.getClass());
+
 				if (!i.getInputType().cast(givenVal)
 						.equals(i.getInputType().cast(expectedVal)))
 					match = false;
@@ -210,62 +270,83 @@ public class BuiltInTester implements Debugger {
 					// If the actual output and the expected output are the
 					// same, then you have a PASS.
 					// Otherwise, its a fail.
-					if(!i.getOutputType().isArray()){
+					if (!i.getOutputType().isArray()) {
 						if (i.getExpectedOutput().equals(actualOutput)) {
-							logInternal(
-									true,
-									i.getInputType().cast(givenVal).toString(),
-									i.getOutputType().cast(actualOutput).toString(),
-									i.getOutputType().cast(i.getExpectedOutput()).toString(), variableID, functionID);
+							logInternal(true, i.getInputType().cast(givenVal)
+									.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(), i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
 							return 0;
 						} else {
-							logInternal(
-									false,
-									i.getInputType().cast(givenVal).toString(),
-									i.getOutputType().cast(actualOutput).toString(),
-									i.getOutputType().cast(i.getExpectedOutput())
-										.toString(), variableID, functionID);
+							logInternal(false, i.getInputType().cast(givenVal)
+									.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(), i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
 							return 1;
 						}
-					}else{
+					} else {
 						boolean match1 = true;
 						boolean test = true;
-						for (int j = 0; j < Array.getLength(i.getExpectedOutput()); j++)
-						{
-							
+						StringBuilder actualOutputString = new StringBuilder();
+						actualOutputString.append("[");
+						for (int j = 0; j < Array.getLength(actualOutput); j++)
+							actualOutputString.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(actualOutput, j))
+									.toString()
+									+ " ");
+						actualOutputString.append("]");
+
+						StringBuilder expectedOutputString = new StringBuilder();
+						
+						expectedOutputString.append("[");
+						for (int j = 0; j < Array.getLength(i
+								.getExpectedOutput()); j++)
+							expectedOutputString.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(i.getExpectedOutput(), j))
+									.toString()
+									+ " ");
+						expectedOutputString.append("]");
+						for (int j = 0; j < Array.getLength(i
+								.getExpectedOutput()); j++) {
+
 							if (!i.getOutputType()
 									.getComponentType()
 									.cast(Array.get(i.getExpectedOutput(), j))
-									.equals(i.getOutputType().getComponentType()
+									.equals(i.getOutputType()
+											.getComponentType()
 											.cast(Array.get(actualOutput, j)))) {
 								test = false;
 								break;
 							}
 						}
-						
-						if(test){
-							logInternal(
-									true,
-									i.getInputType().cast(givenVal).toString(),
-									i.getOutputType().cast(actualOutput).toString(),
-									i.getOutputType().cast(i.getExpectedOutput()).toString(), variableID, functionID);
+
+						if (test) {
+							logInternal(true, i.getInputType().cast(givenVal)
+									.toString(), actualOutputString.toString(),
+									expectedOutputString.toString(),
+									variableID, functionID);
 							return 0;
 						} else {
-							logInternal(
-									false,
-									i.getInputType().cast(givenVal).toString(),
-									i.getOutputType().cast(actualOutput).toString(),
-									i.getOutputType().cast(i.getExpectedOutput())
-										.toString(), variableID, functionID);
+							logInternal(false, i.getInputType().cast(givenVal)
+									.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(), i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
 							return 1;
 						}
-						
+
 					}
 				}
 			}
 		}
 
-		System.out.println(actualOutput);
 		// TODO: Implement piping to any OutputStream
 		return -1;
 	}
