@@ -112,268 +112,282 @@ public class BuiltInTester implements Debugger {
      *            The value that the user logs into the system.
      *           
      */
-    public int log(String variableID, Object actualOutput) {
+  	public int log(String variableID, Object actualOutput) {
+		if(isEnabled){
+		/*
+		 * The list of all Outputs associated with variableID. One Output
+		 * includes a possibleValue, and an output associated with that input.
+		 * Also includes the type of variable for both values.
+		 */
 
-        /*
-         *  The list of all Outputs associated with variableID.
-         *  One Output includes a possibleValue, and an output associated
-         *  with that input. Also includes the type of variable for both values.
-         */
-        
-        ArrayList<Output> expectedOutputs = expectedValues.get(variableID);
-        String functionID = variableResidences.get(variableID);
-        
-        // Iterate through all the outputs trying to find a match with the log
-        for (Output i : expectedOutputs) {
-            
-            
-            //If the Output object contains a possibleValue that is an array, we must
-            //check each element of the array to ensure equality.
-            
-            if (i.getInputType().isArray()) {
-                
-                //Fetch the current value of the variable.
-                Object givenValArr = givenValues.get(variableID);
-                
-                //Fetch one of the possible values for that variable.
-                Object expectedValArr = i.getPossibleInputValue();
+		if (actualOutput.getClass().isArray()
+				&& actualOutput.getClass().getComponentType().isArray()) {
+			System.out.println("Cannot use multidimensional arrays");
+			return 1;
+		}
+		ArrayList<Output> expectedOutputs = expectedValues.get(variableID);
+		String functionID = variableResidences.get(variableID);
 
-                boolean match = true;
-                
-                /*
-                 *  Iterate through each element of the givenValArr array and the expectedValArr array to check for equality.
-                 *  This is because we need to ensure that the current value of the variable (givenValArr) is one of the
-                 *  possible input values. If its not, then the tester does not print anything.
-                 */
-                
-                for (int j = 0; j < Array.getLength(givenValArr); j++) {
-                    if (!i.getInputType()
-                            .getComponentType()
-                            .cast(Array.get(givenValArr, j))
-                            .equals(i.getInputType().getComponentType()
-                                    .cast(Array.get(expectedValArr, j)))) {
-                        match = false;
-                        break;
-                    }
-                }
-                
-                // Given and expected values have a match
-                if (match) {
-                    //Now, we check if the output is an array
-                    if (i.getOutputType().isArray()) {
-                        
-                        // If the output is an array, we need to generate strings of the arrays, so the output is readable by humans.
-                        
-                        StringBuilder inputValue = new StringBuilder();
-                        inputValue.append("[");
-                        for (int j = 0; j < Array.getLength(givenValArr); j++)
-                            inputValue.append(i.getInputType()
-                                    .getComponentType()
-                                    .cast(Array.get(givenValArr, j)).toString()
-                                    + " ");
-                        inputValue.append("]");
+		// Iterate through all the outputs trying to find a match with the log
+		for (Output i : expectedOutputs) {
 
-                        StringBuilder actualOutputString = new StringBuilder();
-                        actualOutputString.append("[");
-                        for (int j = 0; j < Array.getLength(actualOutput); j++)
-                            actualOutputString.append(i.getInputType()
-                                    .getComponentType()
-                                    .cast(Array.get(actualOutput, j))
-                                    .toString()
-                                    + " ");
-                        actualOutputString.append("]");
+			// If the Output object contains a possibleValue that is an array,
+			// we must
+			// check each element of the array to ensure equality.
 
-                        StringBuilder expectedOutputString = new StringBuilder();
-                        expectedOutputString.append("[");
-                        for (int j = 0; j < Array.getLength(i
-                                .getExpectedOutput()); j++)
-                            expectedOutputString.append(i.getInputType()
-                                    .getComponentType()
-                                    .cast(Array.get(i.getExpectedOutput(), j))
-                                    .toString()
-                                    + " ");
-                        expectedOutputString.append("]");
-                        
-                        
-                        boolean test = true;
-                        
-                        /*
-                         * Iterate through the expectedOutput (i.getExpectedOutput()) and actualOutput (the value logged by the user)
-                         * to check for a match.
-                         */
-                        for (int j = 0; j < Array.getLength(i
-                                .getExpectedOutput()); j++) {
+			if (i.getInputType().isArray()) {
 
-                            if (!i.getOutputType()
-                                    .getComponentType()
-                                    .cast(Array.get(i.getExpectedOutput(), j))
-                                    .equals(i.getOutputType()
-                                            .getComponentType()
-                                            .cast(Array.get(actualOutput, j)))) {
-                                test = false;
-                                break;
-                            }
-                        }
+				// Fetch the current value of the variable.
+				Object givenValArr = givenValues.get(variableID);
 
-                        // Write appropiate log message to console
-                        if (test) {
-                            logInternal(true, inputValue.toString(),
-                                    actualOutputString.toString(),
-                                    expectedOutputString.toString(),
-                                    variableID, functionID);
-                            return 0;
-                        } else {
-                            logInternal(false, inputValue.toString(),
-                                    actualOutputString.toString(),
-                                    expectedOutputString.toString(),
-                                    variableID, functionID);
-                            return 1;
-                        }
-                        
-                        
-                        
-                    } else {
-                        
-                        // If the output is not an array, there is no need to build a string representation.
-                        // However, the input is an array, so we still need a string representation of that.
-                        
-                        // Give a string representation of the values
-                        StringBuilder inputValue = new StringBuilder();
-                        inputValue.append("[");
-                        for (int j = 0; j < Array.getLength(givenValArr); j++)
-                            inputValue.append(i.getInputType()
-                                    .getComponentType()
-                                    .cast(Array.get(givenValArr, j)).toString()
-                                    + " ");
-                        inputValue.append("]");
+				// Fetch one of the possible values for that variable.
+				Object expectedValArr = i.getPossibleInputValue();
 
-                        // Check if the expected objects match
-                        if (i.getExpectedOutput().equals(actualOutput)) {
-                        
-                            // write appropriate log message
-                            logInternal(
-                                    true,
-                                    inputValue.toString(),
-                                    i.getOutputType().cast(actualOutput)
-                                            .toString(),
-                                    i.getOutputType()
-                                            .cast(i.getExpectedOutput())
-                                            .toString(), variableID, functionID);
-                            return 0;
-                        } else {
-                            logInternal(
-                                    false,
-                                    inputValue.toString(),
-                                    i.getOutputType().cast(actualOutput)
-                                            .toString(),
-                                    i.getOutputType()
-                                            .cast(i.getExpectedOutput())
-                                            .toString(), variableID, functionID);
-                            return 1;
-                        }
-                    }
+				boolean match = true;
 
-                }
-            } else {
-                // load the givenValues and expectedValues to see if they match
-                Object givenVal = givenValues.get(variableID);
-                Object expectedVal = i.getPossibleInputValue();
+				/*
+				 * Iterate through each element of the givenValArr array and the
+				 * expectedValArr array to check for equality. This is because
+				 * we need to ensure that the current value of the variable
+				 * (givenValArr) is one of the possible input values. If its
+				 * not, then the tester does not print anything.
+				 */
 
-                boolean match = true;
+				for (int j = 0; j < Array.getLength(givenValArr); j++) {
+					if (!i.getInputType()
+							.getComponentType()
+							.cast(Array.get(givenValArr, j))
+							.equals(i.getInputType().getComponentType()
+									.cast(Array.get(expectedValArr, j)))) {
+						match = false;
+						break;
+					}
+				}
 
-                if (!i.getInputType().cast(givenVal)
-                        .equals(i.getInputType().cast(expectedVal)))
-                    match = false;
+				// Given and expected values have a match
+				if (match) {
+					
+					
+					// Now, we check if the output is an array
+					if (i.getOutputType().isArray()) {
 
-                // Given and expected values have a match
-                if (match) {
-                    // This is where I changed alot fo code.
-                    // So instead of comparing strings, I am comparing objects,
-                    // hence the i.getOutputType().cast(actualOutput).toString
-                    // method call.
-                    // If the actual output and the expected output are the
-                    // same, then you have a PASS.
-                    // Otherwise, its a fail.
-                    if (!i.getOutputType().isArray()) {
-                        if (i.getExpectedOutput().equals(actualOutput)) {
-                            logInternal(true, i.getInputType().cast(givenVal)
-                                    .toString(),
-                                    i.getOutputType().cast(actualOutput)
-                                            .toString(), i.getOutputType()
-                                            .cast(i.getExpectedOutput())
-                                            .toString(), variableID, functionID);
-                            return 0;
-                        } else {
-                            logInternal(false, i.getInputType().cast(givenVal)
-                                    .toString(),
-                                    i.getOutputType().cast(actualOutput)
-                                            .toString(), i.getOutputType()
-                                            .cast(i.getExpectedOutput())
-                                            .toString(), variableID, functionID);
-                            return 1;
-                        }
-                    } else {
-                        boolean match1 = true;
-                        boolean test = true;
-                        StringBuilder actualOutputString = new StringBuilder();
-                        actualOutputString.append("[");
-                        for (int j = 0; j < Array.getLength(actualOutput); j++)
-                            actualOutputString.append(i.getInputType()
-                                    .getComponentType()
-                                    .cast(Array.get(actualOutput, j))
-                                    .toString()
-                                    + " ");
-                        actualOutputString.append("]");
+						// If the output is an array, we need to generate
+						// strings of the arrays, so the output is readable by
+						// humans.
 
-                        StringBuilder expectedOutputString = new StringBuilder();
-                        
-                        expectedOutputString.append("[");
-                        for (int j = 0; j < Array.getLength(i
-                                .getExpectedOutput()); j++)
-                            expectedOutputString.append(i.getInputType()
-                                    .getComponentType()
-                                    .cast(Array.get(i.getExpectedOutput(), j))
-                                    .toString()
-                                    + " ");
-                        expectedOutputString.append("]");
-                        for (int j = 0; j < Array.getLength(i
-                                .getExpectedOutput()); j++) {
+						StringBuilder inputValue = new StringBuilder();
+						inputValue.append("[");
+						for (int j = 0; j < Array.getLength(givenValArr); j++)
+							inputValue.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(givenValArr, j)).toString()
+									+ " ");
+						inputValue.append("]");
 
-                            if (!i.getOutputType()
-                                    .getComponentType()
-                                    .cast(Array.get(i.getExpectedOutput(), j))
-                                    .equals(i.getOutputType()
-                                            .getComponentType()
-                                            .cast(Array.get(actualOutput, j)))) {
-                                test = false;
-                                break;
-                            }
-                        }
+						StringBuilder actualOutputString = new StringBuilder();
+						actualOutputString.append("[");
+						for (int j = 0; j < Array.getLength(actualOutput); j++)
+							actualOutputString.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(actualOutput, j))
+									.toString()
+									+ " ");
+						actualOutputString.append("]");
 
-                        if (test) {
-                            logInternal(true, i.getInputType().cast(givenVal)
-                                    .toString(), actualOutputString.toString(),
-                                    expectedOutputString.toString(),
-                                    variableID, functionID);
-                            return 0;
-                        } else {
-                            logInternal(false, i.getInputType().cast(givenVal)
-                                    .toString(),
-                                    i.getOutputType().cast(actualOutput)
-                                            .toString(), i.getOutputType()
-                                            .cast(i.getExpectedOutput())
-                                            .toString(), variableID, functionID);
-                            return 1;
-                        }
+						StringBuilder expectedOutputString = new StringBuilder();
+						expectedOutputString.append("[");
+						for (int j = 0; j < Array.getLength(i
+								.getExpectedOutput()); j++)
+							expectedOutputString.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(i.getExpectedOutput(), j))
+									.toString()
+									+ " ");
+						expectedOutputString.append("]");
 
-                    }
-                }
-            }
-        }
+						boolean test = true;
 
-        // TODO: Implement piping to any OutputStream
-        return -1;
-    }
+						/*
+						 * Iterate through the expectedOutput
+						 * (i.getExpectedOutput()) and actualOutput (the value
+						 * logged by the user) to check for a match.
+						 */
+						for (int j = 0; j < Array.getLength(i
+								.getExpectedOutput()); j++) {
+
+							if (!i.getOutputType()
+									.getComponentType()
+									.cast(Array.get(i.getExpectedOutput(), j))
+									.equals(i.getOutputType()
+											.getComponentType()
+											.cast(Array.get(actualOutput, j)))) {
+								test = false;
+								break;
+							}
+						}
+
+						// Write appropiate log message to console
+						if (test) {
+							logInternal(true, inputValue.toString(),
+									actualOutputString.toString(),
+									expectedOutputString.toString(),
+									variableID, functionID);
+							return 0;
+						} else {
+							logInternal(false, inputValue.toString(),
+									actualOutputString.toString(),
+									expectedOutputString.toString(),
+									variableID, functionID);
+							return 1;
+						}
+
+					} else {
+
+						// If the output is not an array, there is no need to
+						// build a string representation.
+						// However, the input is an array, so we still need a
+						// string representation of that.
+
+						// Give a string representation of the values
+						StringBuilder inputValue = new StringBuilder();
+						inputValue.append("[");
+						for (int j = 0; j < Array.getLength(givenValArr); j++)
+							inputValue.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(givenValArr, j)).toString()
+									+ " ");
+						inputValue.append("]");
+
+						// Check if the expected objects match
+						if (i.getExpectedOutput().equals(actualOutput)) {
+
+							// write appropriate log message
+							logInternal(
+									true,
+									inputValue.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(),
+									i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
+							return 0;
+						} else {
+							logInternal(
+									false,
+									inputValue.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(),
+									i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
+							return 1;
+						}
+					}
+
+				}
+			} else {
+				// load the givenValues and expectedValues to see if they match
+				Object givenVal = givenValues.get(variableID);
+				Object expectedVal = i.getPossibleInputValue();
+
+				boolean match = true;
+				
+				//givenVal can't be an array, so this will suffice to check for equality
+				if (!i.getInputType().cast(givenVal)
+						.equals(i.getInputType().cast(expectedVal)))
+					match = false;
+
+				// Given and expected values have a match
+				if (match) {
+					
+					//Check if the output is an array
+					if (!i.getOutputType().isArray()) {
+						
+						//If its not, check logged value (actualOutput) against the expected output, and write appropriate message to console
+						if (i.getExpectedOutput().equals(actualOutput)) {
+							logInternal(true, i.getInputType().cast(givenVal)
+									.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(), i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
+							return 0;
+						} else {
+							logInternal(false, i.getInputType().cast(givenVal)
+									.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(), i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
+							return 1;
+						}
+					} else {
+						
+						//If the output is an array, we must use StringBuilder to make sure the output is human-readable
+						boolean test = true;
+						StringBuilder actualOutputString = new StringBuilder();
+						actualOutputString.append("[");
+						for (int j = 0; j < Array.getLength(actualOutput); j++)
+							actualOutputString.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(actualOutput, j))
+									.toString()
+									+ " ");
+						actualOutputString.append("]");
+
+						StringBuilder expectedOutputString = new StringBuilder();
+
+						expectedOutputString.append("[");
+						for (int j = 0; j < Array.getLength(i
+								.getExpectedOutput()); j++)
+							expectedOutputString.append(i.getInputType()
+									.getComponentType()
+									.cast(Array.get(i.getExpectedOutput(), j))
+									.toString()
+									+ " ");
+						expectedOutputString.append("]");
+						
+						//Check if the arrays are equal
+						for (int j = 0; j < Array.getLength(i
+								.getExpectedOutput()); j++) {
+
+							if (!i.getOutputType()
+									.getComponentType()
+									.cast(Array.get(i.getExpectedOutput(), j))
+									.equals(i.getOutputType()
+											.getComponentType()
+											.cast(Array.get(actualOutput, j)))) {
+								test = false;
+								break;
+							}
+						}
+						
+						//Write appropriate message to console.
+						if (test) {
+							logInternal(true, i.getInputType().cast(givenVal)
+									.toString(), actualOutputString.toString(),
+									expectedOutputString.toString(),
+									variableID, functionID);
+							return 0;
+						} else {
+							logInternal(false, i.getInputType().cast(givenVal)
+									.toString(),
+									i.getOutputType().cast(actualOutput)
+											.toString(), i.getOutputType()
+											.cast(i.getExpectedOutput())
+											.toString(), variableID, functionID);
+							return 1;
+						}
+
+					}
+				}
+			}
+		}
+		}
+
+		return -1;
+	}
+	
 
     /**
      * Logs and stores the results of the test.
