@@ -442,18 +442,30 @@ class Output {
         this.outputType = outputType;
     }
 
+    /**
+     * @return possible value saved by {@link expecting}
+     */
     public Object getPossibleInputValue() {
         return possibleInputValue;
     }
 
+    /**
+     * @return expected output saved by {@link expecting}
+     */
     public Object getExpectedOutput() {
         return expectedOutput;
     }
 
+    /**
+     * @return output type saved by {@link expecting}
+     */
     public Class<?> getOutputType() {
         return outputType;
     }
 
+    /**
+     * @return input type saved by {@link expecting}
+     */
     public Class<?> getInputType() {
         return inputType;
     }
