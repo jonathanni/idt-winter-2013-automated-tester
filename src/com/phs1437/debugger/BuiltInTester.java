@@ -81,12 +81,6 @@ public class BuiltInTester implements Debugger {
 			Object expectedOutput, String variableID, String functionID,
 			Class<?> inputType, Class<?> outputType) throws IllegalArgumentException {
 		// Put the given variable value assigned to a variableID
-		if (inputType.isArray() && inputType.getComponentType().isArray()
-				|| outputType.isArray()
-				&& outputType.getComponentType().isArray()) {
-			isEnabled = false;
-			throw new IllegalArgumentException("Cannot use multidimensional arrays");
-		}
 
 		if (inputType == int.class || inputType == float.class
 				|| inputType == double.class || inputType == boolean.class
@@ -173,11 +167,6 @@ public class BuiltInTester implements Debugger {
 		 * Also includes the type of variable for both values.
 		 */
 
-		if (actualOutput.getClass().isArray()
-				&& actualOutput.getClass().getComponentType().isArray()) {
-			System.out.println("Cannot use multidimensional arrays");
-			return 1;
-		}
 		ArrayList<Output> expectedOutputs = expectedValues.get(variableID);
 		String functionID = variableResidences.get(variableID);
 
@@ -195,7 +184,13 @@ public class BuiltInTester implements Debugger {
 
 				// Fetch one of the possible values for that variable.
 				Object expectedValArr = i.getPossibleInputValue();
-
+				Class<?> tempType = givenValues.getType();
+				
+				while(!tempType.isArray()){
+					tempType = tempType.getComponentType();
+					numDim++;
+				}
+				
 				boolean match = true;
 
 				/*
@@ -205,17 +200,9 @@ public class BuiltInTester implements Debugger {
 				 * (givenValArr) is one of the possible input values. If its
 				 * not, then the tester does not print anything.
 				 */
+				
+				match = arrayEquals(givenValArr, expectedValArr, tempType);
 
-				for (int j = 0; j < Array.getLength(givenValArr); j++) {
-					if (!i.getInputType()
-							.getComponentType()
-							.cast(Array.get(givenValArr, j))
-							.equals(i.getInputType().getComponentType()
-									.cast(Array.get(expectedValArr, j)))) {
-						match = false;
-						break;
-					}
-				}
 
 				// Given and expected values have a match
 				if (match) {
@@ -260,24 +247,17 @@ public class BuiltInTester implements Debugger {
 
 						boolean test = true;
 
-						/*
-						 * Iterate through the expectedOutput
-						 * (i.getExpectedOutput()) and actualOutput (the value
-						 * logged by the user) to check for a match.
-						 */
-						for (int j = 0; j < Array.getLength(i
-								.getExpectedOutput()); j++) {
 
-							if (!i.getOutputType()
-									.getComponentType()
-									.cast(Array.get(i.getExpectedOutput(), j))
-									.equals(i.getOutputType()
-											.getComponentType()
-											.cast(Array.get(actualOutput, j)))) {
-								test = false;
-								break;
-							}
+						 
+						tempType = givenValues.getType();
+				
+						while(!tempType.isArray()){
+							tempType = tempType.getComponentType();
+							numDim++;
 						}
+						
+						test = arrayEquals(i.getExpectedOutput(), actualOutput, tempType);
+	
 
 						// Write appropiate log message to console
 						if (test) {
@@ -403,19 +383,14 @@ public class BuiltInTester implements Debugger {
 						expectedOutputString.append("]");
 						
 						//Check if the arrays are equal
-						for (int j = 0; j < Array.getLength(i
-								.getExpectedOutput()); j++) {
-
-							if (!i.getOutputType()
-									.getComponentType()
-									.cast(Array.get(i.getExpectedOutput(), j))
-									.equals(i.getOutputType()
-											.getComponentType()
-											.cast(Array.get(actualOutput, j)))) {
-								test = false;
-								break;
-							}
+						tempType = actualOutput.getType();
+				
+						while(!tempType.isArray()){
+							tempType = tempType.getComponentType();
+							numDim++;
 						}
+						
+						test = arrayEquals(i.getExpectedOutput(), actualOutput, tempType);
 						
 						//Write appropriate message to console.
 						if (test) {
