@@ -120,7 +120,38 @@ public class BuiltInTester implements Debugger {
 
 		return 0;
 	}
+	
+	/**
+	* Used by {@link log} to check if multidimensional arrays are equal
+	*
+	* @param array1
+	*			First array to compare
+	* @param array2
+	* 			Second array to compare
+	* @return true if equal, false if not
+	*/
+	
+	public static boolean arrayEquals(Object array1, Object array2, Class<?> type){
+		
+		//Both array have to have the same dimensions
+		if(!array1.getClass().isArray()){
+			System.out.println(array1.toString()+" "+ array2.toString());
+			return type.cast(array1).equals(type.cast(array2));
+			
+		}
+		
+		
+		for(int i = 0; i<Array.getLength(array1); i++){
+				// recursively check for equality
+				if (!equals(Array.get(array1, i), Array.get(array2, i), type)) return false;
+				
 
+		}
+		
+		return true;
+		
+	}
+	
     
     /**
      * Log what is expected (given in the expecting* functions) and if the block
@@ -131,7 +162,8 @@ public class BuiltInTester implements Debugger {
      *            functions
      * @param actualOutput
      *            The value that the user logs into the system.
-     *           
+	 *
+     * @return 0 if success, 1 if error, -1 if logged variable not found           
      */
   	public int log(String variableID, Object actualOutput) {
 		if(isEnabled){
@@ -263,12 +295,14 @@ public class BuiltInTester implements Debugger {
 						}
 
 					} else {
+						/*
+						 If the output is not an array, there is no need to
+						 build a string representation.
+						 However, the input is an array, so we still need a
+						 string representation of that.
 
-						// If the output is not an array, there is no need to
-						// build a string representation.
-						// However, the input is an array, so we still need a
-						// string representation of that.
-
+						
+						*/
 						// Give a string representation of the values
 						StringBuilder inputValue = new StringBuilder();
 						inputValue.append("[");
