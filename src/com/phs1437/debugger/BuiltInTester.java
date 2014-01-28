@@ -137,7 +137,7 @@ public class BuiltInTester implements Debugger {
 		
 		for(int i = 0; i<Array.getLength(array1); i++){
 				// recursively check for equality
-				if (!equals(Array.get(array1, i), Array.get(array2, i), type)) return false;
+				if (!arrayEquals(Array.get(array1, i), Array.get(array2, i), type)) return false;
 				
 
 		}
@@ -184,13 +184,13 @@ public class BuiltInTester implements Debugger {
 
 				// Fetch one of the possible values for that variable.
 				Object expectedValArr = i.getPossibleInputValue();
-				Class<?> tempType = givenValues.getType();
+				Class<?> tempType = i.getInputType();
 				
-				while(!tempType.isArray()){
+				while(tempType.isArray()){
 					tempType = tempType.getComponentType();
-					numDim++;
+					
 				}
-				
+				// System.out.println(tempType);
 				boolean match = true;
 
 				/*
@@ -249,11 +249,11 @@ public class BuiltInTester implements Debugger {
 
 
 						 
-						tempType = givenValues.getType();
+						tempType = i.getInputType();
 				
-						while(!tempType.isArray()){
+						while(tempType.isArray()){
 							tempType = tempType.getComponentType();
-							numDim++;
+							
 						}
 						
 						test = arrayEquals(i.getExpectedOutput(), actualOutput, tempType);
@@ -383,11 +383,11 @@ public class BuiltInTester implements Debugger {
 						expectedOutputString.append("]");
 						
 						//Check if the arrays are equal
-						tempType = actualOutput.getType();
+						Class <?>tempType = i.getOutputType();
 				
-						while(!tempType.isArray()){
+						while(tempType.isArray()){
 							tempType = tempType.getComponentType();
-							numDim++;
+							
 						}
 						
 						test = arrayEquals(i.getExpectedOutput(), actualOutput, tempType);
