@@ -1,6 +1,7 @@
 /**
  * @author Jonathan Ni, Diwakar Ganesan, Kent Ma
  */
+package com.idt.phs1437.debugger;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
