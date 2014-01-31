@@ -39,13 +39,11 @@ interface Debugger
 	 * 
 	 */
 
-	public int expecting(Object mutableInputValue, Object mutablePossibleValue,
-			String expectedString, String variableID, String functionID,
-			Class<?> type);
+	 public int expecting(Object inputValue, Object possibleValue,
+	            Object expectedOutput, String variableID, String functionID,
+	            Class<?> inputType, Class<?> outputType);
 
-	public int expecting(Object[] mutableInputValue,
-			Object[] mutablePossibleValue, String expectedString,
-			String variableID, String functionID, Class<?> type);
+
 
 	/**
 	 * Logs `expectedString`
@@ -62,7 +60,7 @@ interface Debugger
 	 * @return 0 on success, 1 on failure, and -1 on test case not added
 	 * 
 	 */
-	public int log(String variableID, String expectedString);
+	public int log(String variableID, Object actualObject);
 
 	/**
 	 * Enables and disables the BuiltInTester Example Usage:

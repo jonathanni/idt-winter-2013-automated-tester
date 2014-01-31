@@ -1,7 +1,6 @@
 /**
  * @author Jonathan Ni, Diwakar Ganesan, Kent Ma
  */
-package com.phs1437.debugger;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -13,8 +12,7 @@ import java.util.HashMap;
  * TODO: Implement code profiling (optional)
  */
 
-public class BuiltInTester implements Debugger
-{
+public class BuiltInTester implements Debugger {
 
 	/**
 	 * Indicates whether or not the builtin tester is enabled.
@@ -31,8 +29,7 @@ public class BuiltInTester implements Debugger
 	 * Default constructor. Options enabled: false
 	 */
 
-	public BuiltInTester()
-	{
+	public BuiltInTester() {
 		this(false);
 	}
 
@@ -40,8 +37,7 @@ public class BuiltInTester implements Debugger
 	 * Constructor with one argument. Options enabled: choice
 	 */
 
-	public BuiltInTester(boolean enable)
-	{
+	public BuiltInTester(boolean enable) {
 		if (enable)
 			enable();
 		else
@@ -52,45 +48,68 @@ public class BuiltInTester implements Debugger
 	 * Test function: allows the variable to change, being tested only when the
 	 * log function is called.
 	 * 
-	 * @param mutablePossibleValue
-	 *            A possible value for the variable.
 	 * 
-	 * @param expectedString
-	 *            Specifies the string needed to be logged in order to pass the
-	 *            test. Use {@link #log(String)} to actually log the string
-	 *            specified for this.
+	 * @param inputValue
+	 *            The value that is being tested.
 	 * 
+	 * @param possibleValue
+	 *            A possible value for the variable that is being tested. The
+	 *            tester will only function if the current value of the variable
+	 *            matches one of the possible values given. It can be any type.
+	 * @param expectedOutput
+	 *            The output that matches with the given possibleValue For
+	 *            example, if the function finds the square root of a number, if
+	 *            possibleValue is 64, expectedOutput would be 8. It can be any
+	 *            type.
 	 * @param variableID
-	 *            A unique string that identifies the variable inputted. This is
-	 *            used to differentiate between different tests simultaneously
-	 *            running for {@link #log(String)}
-	 * 
+	 *            The name of the variable being tested. If the variable being
+	 *            tested is called x, this parameter's value should be "x"
 	 * @param functionID
 	 *            A unique string to identify the function the tested code
 	 *            resided in.
 	 * 
-	 * @param type
+	 * @param inputType
 	 *            The data type of the variable to be tested. Accepts array
 	 *            types.
-	 * 
+	 * @param outputType
+	 *            The data type of the output. Accepts array types.
 	 * @return 0 on success and 1 on failure
+	 * @throws IllegalArgumentException
 	 * 
 	 */
 
 	public int expecting(Object inputValue, Object possibleValue,
-			String expectedString, String variableID, String functionID,
-			Class<?> type)
-	{
+			Object expectedOutput, String variableID, String functionID,
+			Class<?> inputType, Class<?> outputType)
+			throws IllegalArgumentException {
 		// Put the given variable value assigned to a variableID
+
+		if (inputType == int.class || inputType == float.class
+				|| inputType == double.class || inputType == boolean.class
+				|| inputType == float.class || inputType == byte.class
+				|| inputType == long.class || inputType == short.class
+				|| inputType == char.class || inputType == int[].class
+				|| inputType == float[].class || inputType == double[].class
+				|| inputType == boolean[].class || inputType == float[].class
+				|| inputType == byte[].class || inputType == long[].class
+				|| inputType == short[].class || inputType == char[].class) {
+			throw new IllegalArgumentException(
+					"Please pass object type instead of primitive type");
+		}
 		givenValues.put(variableID, inputValue);
 
 		// Put the expected variable value with the expected String assigned to
 		// a variableID
+
 		ArrayList<Output> tempList;
 		if ((tempList = expectedValues.get(variableID)) == null)
 			tempList = new ArrayList<Output>();
 
-		tempList.add(new Output(possibleValue, expectedString, type));
+		// possibleValue is all the values the input could be, so inputType is
+		// the data type of possibleValue
+		tempList.add(new Output(possibleValue, expectedOutput, inputType,
+				outputType));
+
 		expectedValues.put(variableID, tempList);
 
 		// Assign a variableID to a functionID
@@ -99,34 +118,57 @@ public class BuiltInTester implements Debugger
 		return 0;
 	}
 
-	public int expecting(Object[] inputValue, Object[] possibleValue,
-			String expectedString, String variableID, String functionID,
-			Class<?> type)
-	{
-		if (inputValue.length != possibleValue.length)
-		{
-			Logger.logError("Input and expecting value arrays do not match");
-			return 1;
+	/**
+	 * Used by {@link log} to check if multidimensional arrays are equal
+	 * 
+	 * @param array1
+	 *            First array to compare
+	 * @param array2
+	 *            Second array to compare
+	 * @return true if equal, false if not
+	 */
+
+	public static boolean arrayEquals(Object array1, Object array2,
+			Class<?> type) {
+
+		// Both array have to have the same dimensions
+		if (!array1.getClass().isArray()) {
+			
+			return type.cast(array1).equals(type.cast(array2));
+
 		}
 
-		return expecting(inputValue, possibleValue, expectedString, variableID,
-				functionID, type);
+		for (int i = 0; i < Array.getLength(array1); i++) {
+			// recursively check for equality
+			if (!arrayEquals(Array.get(array1, i), Array.get(array2, i), type))
+				return false;
 
-		/*
-		 * try { givenValues.put(expectedString, inputValue);
-		 * 
-		 * ArrayList<Output> tempList; if ((tempList =
-		 * expectedValues.get(variableID)) == null) tempList = new
-		 * ArrayList<Output>();
-		 * 
-		 * tempList.add(new Output(possibleValue, expectedString, type));
-		 * expectedValues.put(variableID, tempList);
-		 * 
-		 * variableResidences.put(variableID, functionID); } catch (Exception e)
-		 * { e.printStackTrace(); return 1; }
-		 */
+		}
+
+		return true;
+
 	}
 
+	public static String printArray(Object array1,Class<?> type, String final_str) {
+
+		
+		// Both array have to have the same dimensions
+		if (!array1.getClass().isArray()) {
+			System.out.println(array1.toString());
+			return array1.toString()+" ";
+
+		}
+
+		for (int i = 0; i < Array.getLength(array1); i++) {
+			// recursively check for equality
+			final_str+=printArray(Array.get(array1, i), type, final_str);
+			
+			
+		}
+
+		return final_str;
+
+	}
 	/**
 	 * Log what is expected (given in the expecting* functions) and if the block
 	 * of code PASSED or FAILED.
@@ -134,99 +176,120 @@ public class BuiltInTester implements Debugger
 	 * @param variableID
 	 *            the ID of the variable to test for set in the expecting
 	 *            functions
-	 * @param expectedString
-	 *            the message String that is expected
+	 * @param actualOutput
+	 *            The value that the user logs into the system.
+	 * 
+	 * @return 0 if success, 1 if error, -1 if logged variable not found
 	 */
-	public int log(String variableID, String expectedString)
-	{
-		// Find the expected output associated with the value
-		ArrayList<Output> expectedOutputs = expectedValues.get(variableID);
-		String functionID = variableResidences.get(variableID);
+	public int log(String variableID, Object actualOutput) {
+		
+			/*
+			 * The list of all Outputs associated with variableID. One Output
+			 * includes a possibleValue, and an output associated with that
+			 * input. Also includes the type of variable for both values.
+			 */
 
-		for (Output i : expectedOutputs)
-		{
-			if (i.getType().isArray())
-			{
+			ArrayList<Output> expectedOutputs = expectedValues.get(variableID);
+			String functionID = variableResidences.get(variableID);
+
+			// Iterate through all the outputs trying to find a match with the
+			// log
+			for (Output i : expectedOutputs) {
+
+				// Fetch the current value of the variable.
 				Object givenValArr = givenValues.get(variableID);
-				Object expectedValArr = i.getExpectedValue();
+
+				// Fetch one of the possible values for that variable.
+				Object expectedValArr = i.getPossibleInputValue();
+				Class<?> inputComponentType = i.getInputType();
+
+				while (inputComponentType.isArray()) {
+					inputComponentType = inputComponentType.getComponentType();
+
+				}
+				
+				Class<?> outputComponentType = i.getOutputType();
+				
+				while (outputComponentType.isArray()) {
+					outputComponentType = outputComponentType.getComponentType();
+
+				}
 
 				boolean match = true;
-				for (int j = 0; j < Array.getLength(givenValArr); j++)
-					if (!i.getType()
-							.getEnclosingClass()
-							.cast(Array.get(givenValArr, j))
-							.equals(i.getType().getEnclosingClass()
-									.cast(Array.get(expectedValArr, j))))
-					{
-						match = false;
-						break;
-					}
 
-				// Given and expected values have a match
-				if (match)
-				{
-					// Give a string representation of the values
+				//check if they are equal
+				match = arrayEquals(givenValArr, expectedValArr, inputComponentType);
+
+				if (match) {
+
+					String tempString = "";
 					StringBuilder inputValue = new StringBuilder();
 					inputValue.append("[");
-					for (int j = 0; j < Array.getLength(givenValArr); j++)
-						inputValue.append(i.getType().getEnclosingClass()
-								.cast(Array.get(givenValArr, j)).toString()
-								+ " ");
+					tempString = printArray(givenValArr, inputComponentType, "");
+					inputValue.append(tempString);
 					inputValue.append("]");
+				
 
-					// Check if the expected strings match
-					if (i.getExpectedString().equals(expectedString))
-					{
+					
+					StringBuilder actualOutputString = new StringBuilder();
+					actualOutputString.append("[");
+					tempString = printArray(actualOutput, outputComponentType, "");
+					actualOutputString.append(tempString);
+					actualOutputString.append("]");
+					
+					
+					StringBuilder expectedOutputString = new StringBuilder();
+					expectedOutputString.append("[");
+					tempString = printArray(i.getExpectedOutput(), outputComponentType, "");
+					expectedOutputString.append(tempString);
+					expectedOutputString.append("]");
+
+					
+					boolean test = true;
+					
+					test = arrayEquals(i.getExpectedOutput(), actualOutput,
+							outputComponentType);
+					if (test) {
 						logInternal(true, inputValue.toString(),
-								expectedString, i.getExpectedString(),
-								variableID, functionID);
+								actualOutputString.toString(),
+								expectedOutputString.toString(), variableID,
+								functionID);
 						return 0;
-					} else
-					{
+					} else {
 						logInternal(false, inputValue.toString(),
-								expectedString, i.getExpectedString(),
-								variableID, functionID);
+								actualOutputString.toString(),
+								expectedOutputString.toString(), variableID,
+								functionID);
 						return 1;
 					}
-				}
-			} else
-			{
-				Object givenVal = givenValues.get(variableID);
-				Object expectedVal = i.getExpectedValue();
 
-				boolean match = true;
-				if (!i.getType().cast(givenVal)
-						.equals(i.getType().cast(expectedVal)))
-					match = false;
-
-				// Given and expected values have a match
-				if (match)
-				{
-					// Check if the expected strings match
-					if (i.getExpectedString().equals(expectedString))
-					{
-						logInternal(true,
-								i.getType().cast(givenVal).toString(),
-								expectedString, i.getExpectedString(),
-								variableID, functionID);
-						return 0;
-					} else
-					{
-						logInternal(false, i.getType().cast(givenVal)
-								.toString(), expectedString,
-								i.getExpectedString(), variableID, functionID);
-						return 1;
-					}
 				}
+
 			}
-		}
-		// TODO: Implement piping to any OutputStream
+
+			
+		
 		return -1;
 	}
 
+	/**
+	 * Logs and stores the results of the test.
+	 * 
+	 * @param passed
+	 *            Whether the test passed
+	 * @param inputVal
+	 *            the value of the input variable
+	 * @param inputStr
+	 *            the input string
+	 * @param expectedStr
+	 *            The expected string to be logged by {@link log}
+	 * @param variableID
+	 *            The stored variable ID. See {@link expecting}
+	 * @param functionID
+	 *            The stored function ID. See {@link expecting}
+	 */
 	private void logInternal(boolean passed, String inputVal, String inputStr,
-			String expectedStr, String variableID, String functionID)
-	{
+			String expectedStr, String variableID, String functionID) {
 		Logger.logInfo(String
 				.format("Variable %s %s in function %s with value %s, given %s expecting %s",
 						variableID, passed ? "PASSED" : "FAILED", functionID,
@@ -237,8 +300,7 @@ public class BuiltInTester implements Debugger
 	 * Enable the builtin tester. Any functions called with the builtin tester
 	 * will register after it is enabled.
 	 */
-	public void enable()
-	{
+	public void enable() {
 		setEnabled(true);
 	}
 
@@ -246,77 +308,108 @@ public class BuiltInTester implements Debugger
 	 * Disable the builtin tester. Any functions called with the builtin tester
 	 * will be ignored after it is disabled.
 	 */
-	public void disable()
-	{
+	public void disable() {
 		setEnabled(false);
 	}
 
-	public boolean isEnabled()
-	{
+	/**
+	 * @return whether the builtin tester is enabled.
+	 */
+	public boolean isEnabled() {
 		return isEnabled;
 	}
 
-	private void setEnabled(boolean isEnabled)
-	{
+	/**
+	 * Sets the state of the builtin tester
+	 * 
+	 * @param isEnabled
+	 *            which state to set the builtin tester to
+	 */
+	private void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
 }
 
-class Output
-{
-	private final Object expectedValue;
-	private final String expectedString;
-	private final Class<?> type;
+/**
+ * Used by {@link log} for the organization of data.
+ */
+class Output {
+	private final Object possibleInputValue;
+	private final Object expectedOutput;
+	private final Class<?> inputType;
+	private final Class<?> outputType;
 
-	public Output(Object ev, String es, Class<?> type)
-	{
-		this.expectedValue = ev;
-		this.expectedString = new String(es);
-		this.type = type;
+	public Output(Object ev, Object es, Class<?> inputType, Class<?> outputType) {
+		this.possibleInputValue = ev;
+		this.expectedOutput = es;
+		this.inputType = inputType;
+		this.outputType = outputType;
 	}
 
-	public Object getExpectedValue()
-	{
-		return expectedValue;
+	/**
+	 * @return possible value saved by {@link expecting}
+	 */
+	public Object getPossibleInputValue() {
+		return possibleInputValue;
 	}
 
-	public String getExpectedString()
-	{
-		return expectedString;
+	/**
+	 * @return expected output saved by {@link expecting}
+	 */
+	public Object getExpectedOutput() {
+		return expectedOutput;
 	}
 
-	public Class<?> getType()
-	{
-		return type;
+	/**
+	 * @return output type saved by {@link expecting}
+	 */
+	public Class<?> getOutputType() {
+		return outputType;
 	}
 
+	/**
+	 * @return input type saved by {@link expecting}
+	 */
+	public Class<?> getInputType() {
+		return inputType;
+	}
+
+	/**
+	 * Used for determining the equality of two values for {@link expecting}
+	 * once its logged by {@link log}.
+	 * 
+	 * @param other
+	 *            Another value from {@link expecting}
+	 */
 	@Override
-	public boolean equals(Object other)
-	{
+	public boolean equals(Object other) {
 		return other == this
 				|| ((other instanceof Output)
-						&& getType().cast(((Output) other).expectedValue)
-								.equals(getType().cast(expectedValue)) && ((Output) other).expectedString
-							.equals(expectedString));
+						&& getInputType().cast(
+								((Output) other).possibleInputValue).equals(
+								getInputType().cast(possibleInputValue)) && ((Output) other).expectedOutput
+							.equals(expectedOutput));
 	}
 
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((expectedString == null) ? 0 : expectedString.hashCode());
+				+ ((expectedOutput == null) ? 0 : expectedOutput.hashCode());
+		result = prime
+				* result
+				+ ((possibleInputValue == null) ? 0 : possibleInputValue
+						.hashCode());
 		result = prime * result
-				+ ((expectedValue == null) ? 0 : expectedValue.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
+				+ ((inputType == null) ? 0 : inputType.hashCode());
 		return result;
 	}
 
 	@Override
-	public String toString()
-	{
-		return "Output [expectedValue=" + expectedValue + ", expectedString="
-				+ expectedString + ", type=" + type + "]";
+	public String toString() {
+		return "Output [possibleInputValue=" + possibleInputValue
+				+ ", expectedOutput=" + expectedOutput + ", inputType="
+				+ inputType + "]";
 	}
 }
