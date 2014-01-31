@@ -1,12 +1,13 @@
-package com.phs1437.debugger;
-
 /**
- * Debugger Interface ~~~~~~~~~~~~~~~~~~~
+ * Debugger Interface
  * 
  * Outlines the general project structure: the required methods, fields, etc.
  * 
- * @author phs_winter2013, Diwakar Ganesan, Kent Ma, Jonathan Ni
+ * @author phs_winter2014, Diwakar Ganesan, Kent Ma, Jonathan Ni
  */
+
+package com.phs1437.debugger;
+
 interface Debugger
 {
 	/**

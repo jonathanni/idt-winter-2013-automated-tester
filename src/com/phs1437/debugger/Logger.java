@@ -1,13 +1,13 @@
-package com.phs1437.debugger;
-
 /**
  * 
  * Utility class to log information, warnings, and errors. It is the
  * responsibility of the client class to not log when it is disabled.
  * 
- * @author phs_winter2013
+ * @author phs_winter2014
  * 
  */
+
+package com.phs1437.debugger;
 class Logger
 {
 	/**
