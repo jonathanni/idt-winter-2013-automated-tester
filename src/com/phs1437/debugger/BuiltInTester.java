@@ -88,6 +88,9 @@ public class BuiltInTester implements Debugger
 
 	public long startProfile(String codeID)
 	{
+		if (!isEnabled())
+			return -2;
+
 		long nanoTime = System.nanoTime();
 		profileTimes.put(codeID, nanoTime);
 		return nanoTime;
@@ -100,14 +103,17 @@ public class BuiltInTester implements Debugger
 	 * @param codeID
 	 *            the ID associated with the segment of code being tested.
 	 * @return the time in nanoseconds that it took for the segment of code
-	 *         being tested to execute, or -1 if failure if not throwing
-	 *         exception.
+	 *         being tested to execute, -1 if failure if not throwing exception,
+	 *         or -2 if not enabled.
 	 * @throws IllegalArgumentException
 	 *             if failure and throwing exception.
 	 */
 
 	public long lapProfile(String codeID)
 	{
+		if (!isEnabled())
+			return -2;
+
 		if (!profileTimes.containsKey(codeID))
 		{
 			if (!throwsException())
@@ -138,6 +144,9 @@ public class BuiltInTester implements Debugger
 
 	public long stopProfile(String codeID)
 	{
+		if (!isEnabled())
+			return -2;
+
 		long time = lapProfile(codeID);
 		profileTimes.remove(codeID);
 		return time;
