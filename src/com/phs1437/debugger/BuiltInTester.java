@@ -25,7 +25,7 @@ public class BuiltInTester implements Debugger
 	 */
 
 	private boolean isEnabled, throwsException;
-    private static boolean globalIsEnabled;
+	private static boolean globalIsEnabled = true;
 
 	private HashMap<String, ArrayList<Output>> expectedValues = new HashMap<String, ArrayList<Output>>();
 	// Mapping a input id to a value
@@ -72,7 +72,7 @@ public class BuiltInTester implements Debugger
 	{
 		if (enable)
 			enable();
-        else
+		else
 			disable();
 		setThrowsException(throwsException);
 	}
@@ -428,9 +428,9 @@ public class BuiltInTester implements Debugger
 	}
 
 	/**
-	 * Enable the builtin tester locally. Any functions called with the builtin 
-     * tester for this instance will register after it is enabled unless the 
-     * tester is globally disabled with {@link globalDisable}
+	 * Enable the builtin tester locally. Any functions called with the builtin
+	 * tester for this instance will register after it is enabled unless the
+	 * tester is globally disabled with {@link globalDisable}
 	 */
 	public void enable()
 	{
@@ -440,36 +440,37 @@ public class BuiltInTester implements Debugger
 	/**
 	 * Disable the builtin tester. Any functions called with the builtin tester
 	 * object will be ignored after it is disabled.
-     *
-     * NOTE: This does not completely disable BuiltInTester: for that, see 
-     * {@link globalDisable}
+	 * 
+	 * NOTE: This does not completely disable BuiltInTester: for that, see
+	 * {@link globalDisable}
 	 */
 	public void disable()
 	{
 		setEnabled(false);
 	}
 
-    /**
-     * Globally enable all instances of the Built-In Tester. All functions 
-     * called within the builtin tester for all instances also enabled with 
-     * {@link enable} will register.
-     */
-    public static void globalEnable()
-    {
-        globalIsEnabled = true;
-    
-    }
-    /**
-     * Globally disables all instances of the Built-In Tester.
-     * Any functions called with the builtin tester object will be ignored 
-     * after it is disabled.
-     *
-     * To disable it on only a single instance, see {@link disable}.
-     */
-    public static void globalDisable() 
-    {
-        globalIsEnabled = false;
-    }
+	/**
+	 * Globally enable all instances of the Built-In Tester. All functions
+	 * called within the builtin tester for all instances also enabled with
+	 * {@link enable} will register.
+	 */
+	public static void globalEnable()
+	{
+		globalIsEnabled = true;
+
+	}
+
+	/**
+	 * Globally disables all instances of the Built-In Tester. Any functions
+	 * called with the builtin tester object will be ignored after it is
+	 * disabled.
+	 * 
+	 * To disable it on only a single instance, see {@link disable}.
+	 */
+	public static void globalDisable()
+	{
+		globalIsEnabled = false;
+	}
 
 	/**
 	 * @return whether the builtin tester is enabled.
