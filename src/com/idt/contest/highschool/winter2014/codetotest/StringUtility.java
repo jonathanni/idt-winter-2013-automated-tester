@@ -8,98 +8,92 @@ import com.phs1437.debugger.BuiltInTester;
  */
 public class StringUtility {
 
-	
 	/**
 	 * Method that counts the number of vowels in a String
-	 * @param stringToCheck - String to count vowels in
+	 * 
+	 * @param stringToCheck
+	 *            - String to count vowels in
 	 * @return - int number of vowels in supplied String
 	 */
-    private static BuiltInTester tester = new BuiltInTester(true);
+
 	public int countVowels(String stringToCheck) {
-		
+		BuiltInTester tester = new BuiltInTester(true);
+
 		int vowelCount = 0;
-		char currentChar;
 
-        tester.expecting(vowelCount, 0, "false", "vowelcount", "countVowels", int.class, int.class);
-        tester.expecting(currentChar, 0, "false", "currentChar", "countVowels", char.class, char.class);
+		char currentChar = 0;
 
 		//
-		//
-		//
-		//
-		//
-		//
-		//BUG below... the vowelArray contains zero instead of capital O.
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		char[] vowelArray = {'a','A','e','E','i','I','o','0','u','U'};
-        tester.expecting(vowelArray, new char[]{'a', 'A', 'e', 'E', 'i', 'I', 'o', '0', 'u', 'U'}, "false", "vowelArray", "countVowels", char[].class, char[].class);
-
-		
-		// must check string for null before processing 
+		char[] vowelArray = { 'a', 'A', 'e', 'E', 'i', 'I', 'o', '0', 'u', 'U' };
+		tester.expecting(stringToCheck, "hello", 2, "stringToCheck",
+				"public int countVowels(String)", String.class, Integer.class);
+		tester.expecting(stringToCheck, "HELLO", 2, "stringToCheck",
+				"public int countVowels(String)", String.class, Integer.class);
+		tester.expecting(stringToCheck, "AUTOMATEDTESTING", 2, "stringToCheck",
+				"public int countVowels(String)", String.class, Integer.class);
+		// must check string for null before processing
 		if (stringToCheck == null) {
 			return vowelCount;
 		}
-		
+
 		// iterate through each character of the string
 		for (int i = 0; i < stringToCheck.length(); i++) {
 			currentChar = stringToCheck.charAt(i);
-			
+
 			// check if the current character is in the vowelArray
-			for (char vowel: vowelArray) {
+			for (char vowel : vowelArray) {
 				if (currentChar == vowel) {
 					vowelCount++;
 				}
 			}
 		}
-        tester.log("vowelArray", vowelArray);
-		
+		// System.out.println(vowelCount);
+		tester.log("stringToCheck", vowelCount);
+
 		return vowelCount;
 	}
-	
-	
+
 	/**
 	 * Method to return the 2's compliment of a binary String
-	 * @param binaryString - binary string to convert to 2's compliment
-	 * 						 binary string must be positive and only contain 1s and 0s
+	 * 
+	 * @param binaryString
+	 *            - binary string to convert to 2's compliment binary string
+	 *            must be positive and only contain 1s and 0s
 	 * @return - String representation 2's compliment of binary string
 	 */
 	public String binaryByteTwosCompliment(String binaryByteString) {
-	
+
 		String binaryRepresentation = "";
 		char currentChar;
 		char tempDigit;
 		int carryOver = 0;
+
 		
 		// if the binary byte string is null or empty, return an error string
 		if (binaryByteString == null || binaryByteString.isEmpty()) {
 			return FrameworkConstants.BINARY_REPRESENTATION_ERROR;
 		}
-		
+
 		// pad the binary string to be 8 characters long
 		while (binaryByteString.length() < FrameworkConstants.BITS_IN_BYTE) {
-			binaryByteString = FrameworkConstants.ZERO_STRING + binaryByteString;
+			binaryByteString = FrameworkConstants.ZERO_STRING
+					+ binaryByteString;
 		}
-		
+
 		// process binary string from back to front
-		for (int i = binaryByteString.length()-1; i >= 0; i--) {
+		for (int i = binaryByteString.length() - 1; i >= 0; i--) {
 			currentChar = binaryByteString.charAt(i);
-			
+
 			// only handle strings that contain 1s or 0s
 			if (currentChar == '0' || currentChar == '1') {
-				
+
 				// flip the digit
 				if (currentChar == '0') {
 					tempDigit = '1';
 				} else {
 					tempDigit = '0';
 				}
-				
+
 				// if this is the first iteration or if carry over exists, add 1
 				if (i == binaryByteString.length() - 1 || carryOver == 1) {
 					if (tempDigit == '0') {
@@ -110,86 +104,115 @@ public class StringUtility {
 						carryOver = 1;
 					}
 				}
-				
-				// add the determined bit to the binary representation of 2's compliment
+
+				// add the determined bit to the binary representation of 2's
+				// compliment
 				binaryRepresentation = tempDigit + binaryRepresentation;
-				
+
 			} else {
-				// binary byte string contained a non 1 or 0 character, return an error string
+				// binary byte string contained a non 1 or 0 character, return
+				// an error string
 				return FrameworkConstants.BINARY_REPRESENTATION_ERROR;
 			}
 		}
-		
+
+
 		return formatBinaryByteString(binaryRepresentation);
 	}
-	
-	
+
 	/**
 	 * Method to format a binary byte string to 8 characters
-	 * @param binaryByteString - binary byte string to format
+	 * 
+	 * @param binaryByteString
+	 *            - binary byte string to format
 	 * @return - String version of binary byte string with 8 characters
 	 */
 	public String formatBinaryByteString(String binaryByteString) {
-		
-		//  handle null pointers by returning an error string
+
+		// handle null pointers by returning an error string
 		if (binaryByteString == null) {
 			return FrameworkConstants.BINARY_REPRESENTATION_ERROR;
 		}
-		
-		if (binaryByteString != null && binaryByteString.length() < FrameworkConstants.BITS_IN_BYTE) {
+
+		if (binaryByteString != null
+				&& binaryByteString.length() < FrameworkConstants.BITS_IN_BYTE) {
 			// pad the binary string to be 8 characters long
 			while (binaryByteString.length() < FrameworkConstants.BITS_IN_BYTE) {
-				binaryByteString = FrameworkConstants.ZERO_STRING + binaryByteString;
+				binaryByteString = FrameworkConstants.ZERO_STRING
+						+ binaryByteString;
 			}
 		} else {
 			// cut the binary string to be 8 characters long
-			binaryByteString = binaryByteString.substring(binaryByteString.length() - FrameworkConstants.BITS_IN_BYTE);
+			binaryByteString = binaryByteString.substring(binaryByteString
+					.length() - FrameworkConstants.BITS_IN_BYTE);
 		}
-		
+
 		return binaryByteString;
 	}
-	
-	
+
 	/**
-	 * Method to find the index of the first location a specific character appears in a String
-	 * @param stringToCheck - String to check for specific character
-	 * @param charToLookFor - Specific character to look for inside of stringToCheck
-	 * @return - int index of first instance of char found in string, -1 if char is never found
+	 * Method to find the index of the first location a specific character
+	 * appears in a String
+	 * 
+	 * @param stringToCheck
+	 *            - String to check for specific character
+	 * @param charToLookFor
+	 *            - Specific character to look for inside of stringToCheck
+	 * @return - int index of first instance of char found in string, -1 if char
+	 *         is never found
 	 */
 	public int indexOfFirstSpecificChar(String stringToCheck, char charToLookFor) {
-		
+
+		BuiltInTester tester = new BuiltInTester(true);
+		tester.expecting(
+				new String[] { stringToCheck, String.valueOf(charToLookFor) },
+				new String[] { "hello", "h" }, 0, "stringToCheck",
+				"indexOfFirstSpecificChar", String[].class, Integer.class);
+
 		if (stringToCheck == null) {
 			return FrameworkConstants.INVALID_VALUE;
 		}
-		
+
 		for (int i = 0; i < stringToCheck.length(); i++) {
 			if (stringToCheck.charAt(i) == charToLookFor) {
+				tester.log("stringToCheck", i);
 				return i;
 			}
 		}
-		
+
 		return FrameworkConstants.INVALID_VALUE;
 	}
-	
-	
+
 	/**
-	 * Method to find the index of the last location a specific character appears in a String
-	 * @param stringToCheck - String to check for specific character
-	 * @param charToLookFor - Specific character to look for inside of stringToCheck
-	 * @return - int index of last instance of char found in string, -1 if char is never found
+	 * Method to find the index of the last location a specific character
+	 * appears in a String
+	 * 
+	 * @param stringToCheck
+	 *            - String to check for specific character
+	 * @param charToLookFor
+	 *            - Specific character to look for inside of stringToCheck
+	 * @return - int index of last instance of char found in string, -1 if char
+	 *         is never found
 	 */
 	public int indexOfLastSpecificChar(String stringToCheck, char charToLookFor) {
+		BuiltInTester tester = new BuiltInTester(true);
+		tester.expecting(
+				new String[] { stringToCheck, String.valueOf(charToLookFor) },
+				new String[] { "AUTOMATEDTESTING", "E" }, 10, "stringToCheck",
+				"indexOfLastSpecificChar", String[].class, Integer.class);
+		
 		
 		if (stringToCheck == null) {
 			return FrameworkConstants.INVALID_VALUE;
 		}
-		
+
 		for (int i = stringToCheck.length() - 1; i >= 0; i--) {
 			if (stringToCheck.charAt(i) == charToLookFor) {
+				tester.log("stringToCheck", i);
 				return i;
 			}
 		}
-		
+
 		return FrameworkConstants.INVALID_VALUE;
 	}
 }
