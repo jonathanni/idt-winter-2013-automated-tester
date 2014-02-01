@@ -479,7 +479,7 @@ public class BuiltInTester implements Debugger
 	 */
 	public boolean isEnabled()
 	{
-		return isEnabled || globalIsEnabled;
+		return isEnabled && globalIsEnabled;
 	}
 
 	/**
