@@ -3,9 +3,13 @@
  */
 
 package com.phs1437.debugger;
+
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /*
  * TODO: Implement tracking of symbols in code
@@ -13,36 +17,129 @@ import java.util.HashMap;
  * TODO: Implement code profiling (optional)
  */
 
-public class BuiltInTester implements Debugger {
+public class BuiltInTester implements Debugger
+{
 
 	/**
 	 * Indicates whether or not the builtin tester is enabled.
 	 */
 
-	private boolean isEnabled;
+	private boolean isEnabled, throwsException;
 
 	private HashMap<String, ArrayList<Output>> expectedValues = new HashMap<String, ArrayList<Output>>();
 	// Mapping a input id to a value
 	private HashMap<String, Object> givenValues = new HashMap<String, Object>();
 	private HashMap<String, String> variableResidences = new HashMap<String, String>();
+	private HashMap<String, Long> profileTimes = new HashMap<String, Long>();
+
+	@SuppressWarnings("unchecked")
+	private static final List<Class<? extends Serializable>> PRIMITIVE = Arrays
+			.asList(int.class, float.class, double.class, boolean.class,
+					float.class, byte.class, long.class, short.class,
+					char.class, int[].class, float[].class, double[].class,
+					boolean[].class, float[].class, byte[].class, long[].class,
+					short[].class, char[].class);
 
 	/**
 	 * Default constructor. Options enabled: false
 	 */
 
-	public BuiltInTester() {
+	public BuiltInTester()
+	{
 		this(false);
 	}
 
 	/**
-	 * Constructor with one argument. Options enabled: choice
+	 * Constructor with one argument. Sets if the tester is enabled.
+	 * 
+	 * Options enabled: choice
 	 */
 
-	public BuiltInTester(boolean enable) {
+	public BuiltInTester(boolean enable)
+	{
+		this(enable, false);
+	}
+
+	/**
+	 * Constructor with two arguments. Sets if the tester is enabled and if it
+	 * throws exceptions when encountering an error.
+	 * 
+	 * Options enabled: choice, choice
+	 */
+
+	public BuiltInTester(boolean enable, boolean throwsException)
+	{
 		if (enable)
 			enable();
 		else
 			disable();
+		setThrowsException(throwsException);
+	}
+
+	/**
+	 * 
+	 * Start profiling the code. Record the start time of the profile.
+	 * 
+	 * @param codeID
+	 *            the ID associated with the segment of code being tested.
+	 * @return the current time in nanoseconds.
+	 */
+
+	public long startProfile(String codeID)
+	{
+		long nanoTime = System.nanoTime();
+		profileTimes.put(codeID, nanoTime);
+		return nanoTime;
+	}
+
+	/**
+	 * 
+	 * Record how much time it took in nanoseconds for the current code profile.
+	 * 
+	 * @param codeID
+	 *            the ID associated with the segment of code being tested.
+	 * @return the time in nanoseconds that it took for the segment of code
+	 *         being tested to execute, or -1 if failure if not throwing
+	 *         exception.
+	 * @throws IllegalArgumentException
+	 *             if failure and throwing exception.
+	 */
+
+	public long lapProfile(String codeID)
+	{
+		if (!profileTimes.containsKey(codeID))
+		{
+			if (!throwsException())
+			{
+				Logger.logError("Profiler does not contain codeID");
+				return -1;
+			} else
+				throw new IllegalArgumentException(
+						"Profiler does not contain codeID");
+		}
+
+		return System.nanoTime() - profileTimes.get(codeID);
+	}
+
+	/**
+	 * 
+	 * Stop profiling the code portion indicated. Deletes the entry from the
+	 * profile logging system.
+	 * 
+	 * @param codeID
+	 *            the ID associated with the segment of code being tested.
+	 * @return the time in nanoseconds that it took for the segment of code
+	 *         being tested to execute, or -1 if failure if not throwing
+	 *         exception.
+	 * @throws IllegalArgumentException
+	 *             if failure and throwing exception.
+	 */
+
+	public long stopProfile(String codeID)
+	{
+		long time = lapProfile(codeID);
+		profileTimes.remove(codeID);
+		return time;
 	}
 
 	/**
@@ -64,38 +161,40 @@ public class BuiltInTester implements Debugger {
 	 *            type.
 	 * @param variableID
 	 *            The name of the variable being tested. If the variable being
-	 *            tested is called x, this parameter's value should be "x"
+	 *            tested is called x, this parameter's value should be "x".
 	 * @param functionID
 	 *            A unique string to identify the function the tested code
 	 *            resided in.
-	 * 
 	 * @param inputType
 	 *            The data type of the variable to be tested. Accepts array
 	 *            types.
 	 * @param outputType
 	 *            The data type of the output. Accepts array types.
-	 * @return 0 on success and 1 on failure
+	 * @return 0 on success, 1 on failure if not throwing exception, 2 on not
+	 *         enabled.
 	 * @throws IllegalArgumentException
+	 *             if failure and throwing exception.
 	 * 
 	 */
 
 	public int expecting(Object inputValue, Object possibleValue,
 			Object expectedOutput, String variableID, String functionID,
 			Class<?> inputType, Class<?> outputType)
-			throws IllegalArgumentException {
+			throws IllegalArgumentException
+	{
+		if (!isEnabled())
+			return 2;
 		// Put the given variable value assigned to a variableID
 
-		if (inputType == int.class || inputType == float.class
-				|| inputType == double.class || inputType == boolean.class
-				|| inputType == float.class || inputType == byte.class
-				|| inputType == long.class || inputType == short.class
-				|| inputType == char.class || inputType == int[].class
-				|| inputType == float[].class || inputType == double[].class
-				|| inputType == boolean[].class || inputType == float[].class
-				|| inputType == byte[].class || inputType == long[].class
-				|| inputType == short[].class || inputType == char[].class) {
-			throw new IllegalArgumentException(
-					"Please pass object type instead of primitive type");
+		if (PRIMITIVE.contains(inputType) || PRIMITIVE.contains(outputType))
+		{
+			if (!throwsException())
+			{
+				Logger.logError("Primitive type passed instead of Object type");
+				return 1;
+			} else
+				throw new IllegalArgumentException(
+						"Primitive type passed instead of Object type");
 		}
 		givenValues.put(variableID, inputValue);
 
@@ -119,27 +218,20 @@ public class BuiltInTester implements Debugger {
 		return 0;
 	}
 
-	/**
-	 * Used by {@link log} to check if multidimensional arrays are equal
-	 * 
-	 * @param array1
-	 *            First array to compare
-	 * @param array2
-	 *            Second array to compare
-	 * @return true if equal, false if not
-	 */
-
-	public static boolean arrayEquals(Object array1, Object array2,
-			Class<?> type) {
+	private static boolean arrayEquals(Object array1, Object array2,
+			Class<?> type)
+	{
 
 		// Both array have to have the same dimensions
-		if (!array1.getClass().isArray()) {
+		if (!array1.getClass().isArray())
+		{
 
 			return type.cast(array1).equals(type.cast(array2));
 
 		}
 
-		for (int i = 0; i < Array.getLength(array1); i++) {
+		for (int i = 0; i < Array.getLength(array1); i++)
+		{
 			// recursively check for equality
 			if (!arrayEquals(Array.get(array1, i), Array.get(array2, i), type))
 				return false;
@@ -150,47 +242,71 @@ public class BuiltInTester implements Debugger {
 
 	}
 
-    private static String printArray(Object obj, String final_str) {
-        // if obj is not an array return
-        if (obj==null || !obj.getClass().isArray()) return obj.toString();
-        int length = Array.getLength(obj); // get the length of the array
-        
-        int i=0;
-        
-        for (i=0;i<length;i++) {
-        	
-            Object o = Array.get(obj, i); // get the ith element
-            if(o.getClass().isArray())
-            	final_str+="[";
-            if (!o.getClass().isArray()) {
-            	
-                final_str+=o;
-                if(i!=length-1) final_str+=" ";
-               // System.out.println(final_str);
-            } else {
-            	
-                final_str= printArray(o, final_str);
-            }
-            if(o.getClass().isArray())
-            	final_str+="]";
-           
-        }
-        
-        return final_str;
-    }
+	private static String printArray(Object obj, String final_str)
+	{
+		// if obj is not an array return
+		if (obj == null || !obj.getClass().isArray())
+			return obj.toString();
+		int length = Array.getLength(obj); // get the length of the array
+
+		int i = 0;
+
+		for (i = 0; i < length; i++)
+		{
+
+			Object o = Array.get(obj, i); // get the ith element
+			if (o.getClass().isArray())
+				final_str += "[";
+			if (!o.getClass().isArray())
+			{
+
+				final_str += o;
+				if (i != length - 1)
+					final_str += " ";
+				// System.out.println(final_str);
+			} else
+			{
+
+				final_str = printArray(o, final_str);
+			}
+			if (o.getClass().isArray())
+				final_str += "]";
+
+		}
+
+		return final_str;
+	}
+
 	/**
 	 * Log what is expected (given in the expecting* functions) and if the block
 	 * of code PASSED or FAILED.
 	 * 
 	 * @param variableID
 	 *            the ID of the variable to test for set in the expecting
-	 *            functions
+	 *            functions.
 	 * @param actualOutput
 	 *            The value that the user logs into the system.
 	 * 
-	 * @return 0 if success, 1 if error, -1 if logged variable not found
+	 * @return 0 if success, 1 if error if not throwing exception, 2 if not
+	 *         enabled, -1 if logged variable not found.
+	 * @throws IllegalArgumentException
+	 *             if error and throwing exception.
 	 */
-	public int log(String variableID, Object actualOutput) {
+	public int log(String variableID, Object actualOutput)
+	{
+		if (!isEnabled())
+			return 2;
+
+		if (!expectedValues.containsKey(variableID))
+		{
+			if (!throwsException())
+			{
+				Logger.logError("Trying to log variableID that was not added with expecting function");
+				return 1;
+			} else
+				throw new IllegalArgumentException(
+						"Trying to log variableID that was not added with expecting function");
+		}
 
 		/*
 		 * The list of all Outputs associated with variableID. One Output
@@ -203,7 +319,8 @@ public class BuiltInTester implements Debugger {
 
 		// Iterate through all the given outputs trying to find a match with the
 		// log
-		for (Output i : expectedOutputs) {
+		for (Output i : expectedOutputs)
+		{
 
 			// Fetch the current value of the variable.
 			Object givenValArr = givenValues.get(variableID);
@@ -212,14 +329,16 @@ public class BuiltInTester implements Debugger {
 			Object possibleInputValArr = i.getPossibleInputValue();
 			Class<?> inputComponentType = i.getInputType();
 
-			while (inputComponentType.isArray()) {
+			while (inputComponentType.isArray())
+			{
 				inputComponentType = inputComponentType.getComponentType();
 
 			}
 
 			Class<?> outputComponentType = i.getOutputType();
 
-			while (outputComponentType.isArray()) {
+			while (outputComponentType.isArray())
+			{
 				outputComponentType = outputComponentType.getComponentType();
 
 			}
@@ -230,7 +349,8 @@ public class BuiltInTester implements Debugger {
 			match = arrayEquals(givenValArr, possibleInputValArr,
 					inputComponentType);
 
-			if (match) {
+			if (match)
+			{
 
 				String tempString = "";
 				StringBuilder inputValue = new StringBuilder();
@@ -248,8 +368,7 @@ public class BuiltInTester implements Debugger {
 
 				StringBuilder expectedOutputString = new StringBuilder();
 				expectedOutputString.append("[");
-				tempString = printArray(i.getExpectedOutput(),
-						 "");
+				tempString = printArray(i.getExpectedOutput(), "");
 				expectedOutputString.append(tempString);
 				expectedOutputString.append("]");
 
@@ -258,14 +377,16 @@ public class BuiltInTester implements Debugger {
 				test = arrayEquals(i.getExpectedOutput(), actualOutput,
 						outputComponentType);
 
-				if (test) {
+				if (test)
+				{
 
 					logInternal(true, inputValue.toString(),
 							actualOutputString.toString(),
 							expectedOutputString.toString(), variableID,
 							functionID);
 					return 0;
-				} else {
+				} else
+				{
 					logInternal(false, inputValue.toString(),
 							actualOutputString.toString(),
 							expectedOutputString.toString(), variableID,
@@ -297,7 +418,8 @@ public class BuiltInTester implements Debugger {
 	 *            The stored function ID. See {@link expecting}
 	 */
 	private void logInternal(boolean passed, String inputVal, String inputStr,
-			String expectedStr, String variableID, String functionID) {
+			String expectedStr, String variableID, String functionID)
+	{
 		Logger.logInfo(String
 				.format("Variable %s %s in function %s with value %s. Logged Output: %s --- Expected Output: %s",
 						variableID, passed ? "PASSED" : "FAILED", functionID,
@@ -308,7 +430,8 @@ public class BuiltInTester implements Debugger {
 	 * Enable the builtin tester. Any functions called with the builtin tester
 	 * will register after it is enabled.
 	 */
-	public void enable() {
+	public void enable()
+	{
 		setEnabled(true);
 	}
 
@@ -316,14 +439,16 @@ public class BuiltInTester implements Debugger {
 	 * Disable the builtin tester. Any functions called with the builtin tester
 	 * will be ignored after it is disabled.
 	 */
-	public void disable() {
+	public void disable()
+	{
 		setEnabled(false);
 	}
 
 	/**
 	 * @return whether the builtin tester is enabled.
 	 */
-	public boolean isEnabled() {
+	public boolean isEnabled()
+	{
 		return isEnabled;
 	}
 
@@ -333,21 +458,34 @@ public class BuiltInTester implements Debugger {
 	 * @param isEnabled
 	 *            which state to set the builtin tester to
 	 */
-	private void setEnabled(boolean isEnabled) {
+	private void setEnabled(boolean isEnabled)
+	{
 		this.isEnabled = isEnabled;
+	}
+
+	public boolean throwsException()
+	{
+		return throwsException;
+	}
+
+	public void setThrowsException(boolean throwsException)
+	{
+		this.throwsException = throwsException;
 	}
 }
 
 /**
  * Used by {@link log} for the organization of data.
  */
-class Output {
+class Output
+{
 	private final Object possibleInputValue;
 	private final Object expectedOutput;
 	private final Class<?> inputType;
 	private final Class<?> outputType;
 
-	public Output(Object ev, Object es, Class<?> inputType, Class<?> outputType) {
+	public Output(Object ev, Object es, Class<?> inputType, Class<?> outputType)
+	{
 		this.possibleInputValue = ev;
 		this.expectedOutput = es;
 		this.inputType = inputType;
@@ -357,28 +495,32 @@ class Output {
 	/**
 	 * @return possible value saved by {@link expecting}
 	 */
-	public Object getPossibleInputValue() {
+	public Object getPossibleInputValue()
+	{
 		return possibleInputValue;
 	}
 
 	/**
 	 * @return expected output saved by {@link expecting}
 	 */
-	public Object getExpectedOutput() {
+	public Object getExpectedOutput()
+	{
 		return expectedOutput;
 	}
 
 	/**
 	 * @return output type saved by {@link expecting}
 	 */
-	public Class<?> getOutputType() {
+	public Class<?> getOutputType()
+	{
 		return outputType;
 	}
 
 	/**
 	 * @return input type saved by {@link expecting}
 	 */
-	public Class<?> getInputType() {
+	public Class<?> getInputType()
+	{
 		return inputType;
 	}
 
@@ -390,7 +532,8 @@ class Output {
 	 *            Another value from {@link expecting}
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(Object other)
+	{
 		return other == this
 				|| ((other instanceof Output)
 						&& getInputType().cast(
@@ -400,7 +543,8 @@ class Output {
 	}
 
 	@Override
-	public int hashCode() {
+	public int hashCode()
+	{
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
@@ -415,7 +559,8 @@ class Output {
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return "Output [possibleInputValue=" + possibleInputValue
 				+ ", expectedOutput=" + expectedOutput + ", inputType="
 				+ inputType + "]";
