@@ -1,6 +1,7 @@
 package com.idt.contest.highschool.winter2014.codetotest;
 
 import com.idt.contest.highschool.winter2014.framework.FrameworkConstants;
+import com.phs1437.debugger.BuiltInTester;
 
 /**
  * Class containing time related utility methods 
@@ -75,6 +76,14 @@ public class TimeUtility {
 		int    total_days, num_leap_year;
 		double seconds = 0;
 
+		BuiltInTester tester = new BuiltInTester(true);
+		
+		tester.expecting(input_date, "2014/02/01", 1391212800.0, "input_date", "dateToPosix", String.class, Double.class);
+		tester.expecting(input_date, "2014/02/02", 1391299200.0, "input_date", "dateToPosix", String.class, Double.class);
+		tester.expecting(input_date, "2014/02/03", 1391385600.0, "input_date", "dateToPosix", String.class, Double.class);
+		
+		
+		//System.out.println("helllo");
 		try {
 			// parse year, month, and day from input_date
 			year  = Integer.parseInt(input_date.substring(0,4));
@@ -135,7 +144,7 @@ public class TimeUtility {
 			// instead of throwing an error, this method will return -1 for any non valid date
 			seconds = -1.0;
 		}
-
+		tester.log("input_date", seconds );
 		return seconds;
 	}
 	
