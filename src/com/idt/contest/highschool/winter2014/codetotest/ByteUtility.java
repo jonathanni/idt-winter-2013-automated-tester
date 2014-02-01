@@ -20,13 +20,11 @@ public class ByteUtility {
 		byte remainder = 0;
 		byte number = b;
 		String binaryRepresentation = "";
-
-        tester.expecting(b, 0, "true", "parameter", "bytetobinytarystring", byte.class, byte.class);
-        tester.expecting(remainder, 0, "true", "remainder", "bytetobinytarystring", byte.class, byte.class);
-
-        tester.expecting(number, 0, "true", "number", "bytetobinytarystring", byte.class, byte.class);
-        tester.expecting(binaryRepresentation, 0, "true","binaryRepresentation", "bytetobinytarystring", String.class, String.class);
 		
+		tester.expecting(b, (byte)0, "0", "b", "byteToBinytaryString(byte)", Byte.class, String.class);
+        tester.expecting(b, (byte)12, "1100", "b", "byteToBinytaryString(byte)", Byte.class, String.class);
+        tester.expecting(b, (byte)64, "1000000", "b", "byteToBinytaryString(byte)", Byte.class, String.class);
+        tester.expecting(b, (byte)256, "100000000", "b", "byteToBinytaryString(byte)", Byte.class, String.class);
 		// handle the case of zero 
 		if (b == 0) {
 			//
@@ -38,19 +36,20 @@ public class ByteUtility {
 			// BUG below... the wrong value is being returned for zero.
 			// Instead of returning FrameworkConstants.ONE_STRING,
 			// the code should return FrameworkConstants.ZERO_STRING.
+			//	
 			//
 			//
 			//
 			//
 			//
-			//
-            tester.log("parameter", b);
+           
+			tester.log("b", binaryRepresentation);
 			return FrameworkConstants.ONE_STRING;
 		}
 		
 		// number is greater than zero 
 		while (number != 0) {	
-            tester.log("number", remainder);
+
 			remainder = (byte) (number % 2);
 			number = (byte) (number / 2); 
 			
@@ -58,7 +57,7 @@ public class ByteUtility {
 			if (remainder == 0) {
 				// if we have a zero, add a zero to the front of the builder string
 				binaryRepresentation = FrameworkConstants.ZERO_STRING + binaryRepresentation;
-                tester.log("remainder", remainder);
+               
 			} else {
 				// if we have any value other than zero, add a one to the front of the builder string
 				binaryRepresentation = FrameworkConstants.ONE_STRING + binaryRepresentation;
@@ -69,11 +68,15 @@ public class ByteUtility {
 		if (b < 0) {
 			StringUtility su = new StringUtility();
 			binaryRepresentation = su.binaryByteTwosCompliment(binaryRepresentation);
-            tester.log("binaryRepresentation", binaryRepresentation);
+          
 
 
 
 		}
+		
+		System.out.println(binaryRepresentation);
+		
+		tester.log("b", binaryRepresentation);
 		
 		return binaryRepresentation;
 	}
