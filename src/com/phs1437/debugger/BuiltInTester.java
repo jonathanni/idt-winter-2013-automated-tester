@@ -1,8 +1,8 @@
 /**
  * @author Jonathan Ni, Diwakar Ganesan, Kent Ma
  */
-package com.idt.phs1437.debugger;
 
+package com.phs1437.debugger;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -134,7 +134,7 @@ public class BuiltInTester implements Debugger {
 
 		// Both array have to have the same dimensions
 		if (!array1.getClass().isArray()) {
-			
+
 			return type.cast(array1).equals(type.cast(array2));
 
 		}
@@ -150,26 +150,34 @@ public class BuiltInTester implements Debugger {
 
 	}
 
-	public static String printArray(Object array1,Class<?> type, String final_str) {
-
-		
-		// Both array have to have the same dimensions
-		if (!array1.getClass().isArray()) {
-			System.out.println(array1.toString());
-			return array1.toString()+" ";
-
-		}
-
-		for (int i = 0; i < Array.getLength(array1); i++) {
-			// recursively check for equality
-			final_str+=printArray(Array.get(array1, i), type, final_str);
-			
-			
-		}
-
-		return final_str;
-
-	}
+    private static String printArray(Object obj, String final_str) {
+        // if obj is not an array return
+        if (obj==null || !obj.getClass().isArray()) return obj.toString();
+        int length = Array.getLength(obj); // get the length of the array
+        
+        int i=0;
+        
+        for (i=0;i<length;i++) {
+        	
+            Object o = Array.get(obj, i); // get the ith element
+            if(o.getClass().isArray())
+            	final_str+="[";
+            if (!o.getClass().isArray()) {
+            	
+                final_str+=o;
+                if(i!=length-1) final_str+=" ";
+               // System.out.println(final_str);
+            } else {
+            	
+                final_str= printArray(o, final_str);
+            }
+            if(o.getClass().isArray())
+            	final_str+="]";
+           
+        }
+        
+        return final_str;
+    }
 	/**
 	 * Log what is expected (given in the expecting* functions) and if the block
 	 * of code PASSED or FAILED.
@@ -183,93 +191,92 @@ public class BuiltInTester implements Debugger {
 	 * @return 0 if success, 1 if error, -1 if logged variable not found
 	 */
 	public int log(String variableID, Object actualOutput) {
-		
-			/*
-			 * The list of all Outputs associated with variableID. One Output
-			 * includes a possibleValue, and an output associated with that
-			 * input. Also includes the type of variable for both values.
-			 */
 
-			ArrayList<Output> expectedOutputs = expectedValues.get(variableID);
-			String functionID = variableResidences.get(variableID);
+		/*
+		 * The list of all Outputs associated with variableID. One Output
+		 * includes a possibleValue, and an output associated with that input.
+		 * Also includes the type of variable for both values.
+		 */
 
-			// Iterate through all the outputs trying to find a match with the
-			// log
-			for (Output i : expectedOutputs) {
+		ArrayList<Output> expectedOutputs = expectedValues.get(variableID);
+		String functionID = variableResidences.get(variableID);
 
-				// Fetch the current value of the variable.
-				Object givenValArr = givenValues.get(variableID);
+		// Iterate through all the given outputs trying to find a match with the
+		// log
+		for (Output i : expectedOutputs) {
 
-				// Fetch one of the possible values for that variable.
-				Object expectedValArr = i.getPossibleInputValue();
-				Class<?> inputComponentType = i.getInputType();
+			// Fetch the current value of the variable.
+			Object givenValArr = givenValues.get(variableID);
 
-				while (inputComponentType.isArray()) {
-					inputComponentType = inputComponentType.getComponentType();
+			// Fetch one of the possible values for that variable.
+			Object possibleInputValArr = i.getPossibleInputValue();
+			Class<?> inputComponentType = i.getInputType();
 
-				}
-				
-				Class<?> outputComponentType = i.getOutputType();
-				
-				while (outputComponentType.isArray()) {
-					outputComponentType = outputComponentType.getComponentType();
+			while (inputComponentType.isArray()) {
+				inputComponentType = inputComponentType.getComponentType();
 
-				}
+			}
 
-				boolean match = true;
+			Class<?> outputComponentType = i.getOutputType();
 
-				//check if they are equal
-				match = arrayEquals(givenValArr, expectedValArr, inputComponentType);
+			while (outputComponentType.isArray()) {
+				outputComponentType = outputComponentType.getComponentType();
 
-				if (match) {
+			}
 
-					String tempString = "";
-					StringBuilder inputValue = new StringBuilder();
-					inputValue.append("[");
-					tempString = printArray(givenValArr, inputComponentType, "");
-					inputValue.append(tempString);
-					inputValue.append("]");
-				
+			boolean match = true;
 
-					
-					StringBuilder actualOutputString = new StringBuilder();
-					actualOutputString.append("[");
-					tempString = printArray(actualOutput, outputComponentType, "");
-					actualOutputString.append(tempString);
-					actualOutputString.append("]");
-					
-					
-					StringBuilder expectedOutputString = new StringBuilder();
-					expectedOutputString.append("[");
-					tempString = printArray(i.getExpectedOutput(), outputComponentType, "");
-					expectedOutputString.append(tempString);
-					expectedOutputString.append("]");
+			// check if they are equal
+			match = arrayEquals(givenValArr, possibleInputValArr,
+					inputComponentType);
 
-					
-					boolean test = true;
-					
-					test = arrayEquals(i.getExpectedOutput(), actualOutput,
-							outputComponentType);
-					if (test) {
-						logInternal(true, inputValue.toString(),
-								actualOutputString.toString(),
-								expectedOutputString.toString(), variableID,
-								functionID);
-						return 0;
-					} else {
-						logInternal(false, inputValue.toString(),
-								actualOutputString.toString(),
-								expectedOutputString.toString(), variableID,
-								functionID);
-						return 1;
-					}
+			if (match) {
 
+				String tempString = "";
+				StringBuilder inputValue = new StringBuilder();
+				inputValue.append("[");
+				tempString = printArray(givenValArr, "");
+				System.out.println("-----");
+				inputValue.append(tempString);
+				inputValue.append("]");
+
+				StringBuilder actualOutputString = new StringBuilder();
+				actualOutputString.append("[");
+				tempString = printArray(actualOutput, "");
+				actualOutputString.append(tempString);
+				actualOutputString.append("]");
+
+				StringBuilder expectedOutputString = new StringBuilder();
+				expectedOutputString.append("[");
+				tempString = printArray(i.getExpectedOutput(),
+						 "");
+				expectedOutputString.append(tempString);
+				expectedOutputString.append("]");
+
+				boolean test = true;
+
+				test = arrayEquals(i.getExpectedOutput(), actualOutput,
+						outputComponentType);
+
+				if (test) {
+
+					logInternal(true, inputValue.toString(),
+							actualOutputString.toString(),
+							expectedOutputString.toString(), variableID,
+							functionID);
+					return 0;
+				} else {
+					logInternal(false, inputValue.toString(),
+							actualOutputString.toString(),
+							expectedOutputString.toString(), variableID,
+							functionID);
+					return 1;
 				}
 
 			}
 
-			
-		
+		}
+
 		return -1;
 	}
 
@@ -292,7 +299,7 @@ public class BuiltInTester implements Debugger {
 	private void logInternal(boolean passed, String inputVal, String inputStr,
 			String expectedStr, String variableID, String functionID) {
 		Logger.logInfo(String
-				.format("Variable %s %s in function %s with value %s, given %s expecting %s",
+				.format("Variable %s %s in function %s with value %s. Logged Output: %s --- Expected Output: %s",
 						variableID, passed ? "PASSED" : "FAILED", functionID,
 						inputVal, inputStr, expectedStr));
 	}
