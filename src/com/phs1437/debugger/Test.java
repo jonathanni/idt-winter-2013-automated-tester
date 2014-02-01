@@ -52,7 +52,7 @@ public class Test
 
 	public static boolean isEven(int x)
 	{
-		BuiltInTester tester = new BuiltInTester(true);
+		BuiltInTester tester = new BuiltInTester(true, true);
 
 		tester.startProfile("A1");
 		tester.expecting(x, -1, false, "x", "public boolean isEven(int)",
@@ -65,11 +65,11 @@ public class Test
 				Integer.class, Boolean.class);
 		tester.expecting(x, 3, false, "x", "public boolean isEven(int)",
 				Integer.class, Boolean.class);
-		System.out.println(tester.stopProfile("A1") / 1000000.0f + " ms");
+		System.out.println(tester.lapProfile("A1") / 1000000.0f + " ms");
 
 		if (x % 2 == 0)
 		{
-			tester.log("x", true);
+			tester.log("a", true);
 			return true;
 		}
 

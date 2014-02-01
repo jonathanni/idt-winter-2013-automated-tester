@@ -70,13 +70,10 @@ public class BuiltInTester implements Debugger
 
 	public BuiltInTester(boolean enable, boolean throwsException)
 	{
-		if (enable) {
-            globalEnable();
+		if (enable)
 			enable();
-        } else {
-            globalDisable();
+        else
 			disable();
-        }
 		setThrowsException(throwsException);
 	}
 
